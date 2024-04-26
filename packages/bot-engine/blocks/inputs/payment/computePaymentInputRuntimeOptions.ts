@@ -77,7 +77,7 @@ const createStripePaymentIntent =
       options.currency === 'EUR' ? 'fr-FR' : undefined,
       {
         style: 'currency',
-        currency,
+        currency: options.currency,
       }
     )
 

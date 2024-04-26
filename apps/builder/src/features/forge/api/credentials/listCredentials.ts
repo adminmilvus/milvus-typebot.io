@@ -3,13 +3,13 @@ import { authenticatedProcedure } from '@/helpers/server/trpc'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { isReadWorkspaceFobidden } from '@/features/workspace/helpers/isReadWorkspaceFobidden'
-import { forgedBlockIds } from '@typebot.io/forge-repository/constants'
+import { enabledBlocks } from '@typebot.io/forge-repository'
 
 export const listCredentials = authenticatedProcedure
   .input(
     z.object({
       workspaceId: z.string(),
-      type: z.enum(forgedBlockIds),
+      type: z.enum(enabledBlocks),
     })
   )
   .query(async ({ input: { workspaceId, type }, ctx: { user } }) => {

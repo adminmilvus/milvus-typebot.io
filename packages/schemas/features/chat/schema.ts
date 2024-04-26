@@ -28,20 +28,13 @@ import { preprocessTypebot } from '../typebot/helpers/preprocessTypebot'
 import { typebotV5Schema, typebotV6Schema } from '../typebot/typebot'
 import { BubbleBlockType } from '../blocks/bubbles/constants'
 import { clientSideActionSchema } from './clientSideAction'
-import { ChatSession as ChatSessionFromPrisma } from '@typebot.io/prisma'
 
 const chatSessionSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
   state: sessionStateSchema,
-  isReplying: z
-    .boolean()
-    .nullable()
-    .describe(
-      'Used in WhatsApp runtime to avoid concurrent replies from the bot'
-    ),
-}) satisfies z.ZodType<ChatSessionFromPrisma, z.ZodTypeDef, unknown>
+})
 export type ChatSession = z.infer<typeof chatSessionSchema>
 
 const textMessageSchema = z
@@ -99,8 +92,6 @@ const embedMessageSchema = z
   })
 
 const displayEmbedBubbleSchema = z.object({
-  url: z.string().optional(),
-  maxBubbleWidth: z.number().optional(),
   waitForEventFunction: z
     .object({
       args: z.record(z.string(), z.unknown()),
@@ -171,6 +162,7 @@ export const chatLogSchema = logSchema
 export type ChatLog = z.infer<typeof chatLogSchema>
 
 export const startChatInputSchema = z.object({
+  chat_id: z.string().optional(),
   publicId: z
     .string()
     .describe(
@@ -233,15 +225,14 @@ export const startPreviewChatInputSchema = z.object({
     .describe(
       "[Where to find my bot's ID?](../how-to#how-to-find-my-typebotid)"
     ),
-  isStreamEnabled: z.boolean().optional().default(false),
+  isStreamEnabled: z.boolean().optional(),
   message: z.string().optional(),
   isOnlyRegistering: z
     .boolean()
     .optional()
     .describe(
       'If set to `true`, it will only register the session and not start the bot. This is used for 3rd party chat platforms as it can require a session to be registered before sending the first message.'
-    )
-    .default(false),
+    ),
   typebot: startTypebotSchema
     .optional()
     .describe(

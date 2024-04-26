@@ -7,7 +7,7 @@ import { defaultImageBubbleContent } from '@typebot.io/schemas/features/blocks/b
 
 type Props = {
   content: ImageBubbleBlock['content']
-  onTransitionEnd?: (ref?: HTMLDivElement) => void
+  onTransitionEnd: (offsetTop?: number) => void
 }
 
 export const showAnimationDuration = 400
@@ -19,15 +19,13 @@ let typingTimeout: NodeJS.Timeout
 export const ImageBubble = (props: Props) => {
   let ref: HTMLDivElement | undefined
   let image: HTMLImageElement | undefined
-  const [isTyping, setIsTyping] = createSignal(
-    props.onTransitionEnd ? true : false
-  )
+  const [isTyping, setIsTyping] = createSignal(true)
 
   const onTypingEnd = () => {
     if (!isTyping()) return
     setIsTyping(false)
     setTimeout(() => {
-      props.onTransitionEnd?.(ref)
+      props.onTransitionEnd(ref?.offsetTop)
     }, showAnimationDuration)
   }
 
@@ -51,11 +49,9 @@ export const ImageBubble = (props: Props) => {
       alt={
         props.content?.clickLink?.alt ?? defaultImageBubbleContent.clickLink.alt
       }
-      class={clsx(
-        isTyping() ? 'opacity-0' : 'opacity-100',
-        props.onTransitionEnd ? 'text-fade-in' : undefined,
-        props.content?.url?.endsWith('.svg') ? 'w-full' : undefined
-      )}
+      class={
+        'text-fade-in w-full ' + (isTyping() ? 'opacity-0' : 'opacity-100')
+      }
       style={{
         'max-height': '512px',
         height: isTyping() ? '32px' : 'auto',
@@ -66,13 +62,7 @@ export const ImageBubble = (props: Props) => {
   )
 
   return (
-    <div
-      class={clsx(
-        'flex flex-col',
-        props.onTransitionEnd ? 'animate-fade-in' : undefined
-      )}
-      ref={ref}
-    >
+    <div class="flex flex-col animate-fade-in" ref={ref}>
       <div class="flex w-full items-center">
         <div class="flex relative z-10 items-start typebot-host-bubble max-w-full">
           <div

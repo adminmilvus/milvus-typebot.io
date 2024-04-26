@@ -71,7 +71,8 @@ export const parseButtonsReply =
     const matchedItem = longestItemsFirst.find(
       (item) =>
         item.id === inputValue ||
-        (item.content && inputValue.trim() === item.content.trim())
+        (item.content &&
+          inputValue.toLowerCase().trim() === item.content.toLowerCase().trim())
     )
     if (!matchedItem) return { status: 'fail' }
     return {

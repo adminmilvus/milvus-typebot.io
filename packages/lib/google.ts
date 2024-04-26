@@ -1,5 +1,6 @@
 import { env } from '@typebot.io/env'
 import { Credentials as CredentialsFromDb } from '@typebot.io/prisma'
+import { GoogleSheetsCredentials } from '@typebot.io/schemas'
 import { decrypt } from './api/encryption/decrypt'
 import { encrypt } from './api/encryption/encrypt'
 import prisma from './prisma'
@@ -13,7 +14,10 @@ export const getAuthenticatedGoogleClient = async (
     where: { id: credentialsId },
   })) as CredentialsFromDb | undefined
   if (!credentials) return
-  const data = await decrypt(credentials.data, credentials.iv)
+  const data = (await decrypt(
+    credentials.data,
+    credentials.iv
+  )) as GoogleSheetsCredentials['data']
 
   const oauth2Client = new OAuth2Client(
     env.GOOGLE_CLIENT_ID,
@@ -26,14 +30,17 @@ export const getAuthenticatedGoogleClient = async (
 }
 
 const updateTokens =
-  (credentialsId: string, existingCredentials: any) =>
+  (
+    credentialsId: string,
+    existingCredentials: GoogleSheetsCredentials['data']
+  ) =>
   async (credentials: Credentials) => {
     if (
       isDefined(existingCredentials.id_token) &&
       credentials.id_token !== existingCredentials.id_token
     )
       return
-    const newCredentials = {
+    const newCredentials: GoogleSheetsCredentials['data'] = {
       ...existingCredentials,
       expiry_date: credentials.expiry_date,
       access_token: credentials.access_token,

@@ -24,7 +24,7 @@ import { env } from '@typebot.io/env'
 import { MoreInfoTooltip } from '../MoreInfoTooltip'
 
 export type TextInputProps = {
-  forceDebounce?: boolean
+  colorLabel?: string
   defaultValue?: string
   onChange?: (value: string) => void
   debounceTimeout?: number
@@ -63,7 +63,6 @@ export const TextInput = forwardRef(function TextInput(
     autoComplete,
     isDisabled,
     autoFocus,
-    forceDebounce,
     onChange: _onChange,
     onFocus,
     onKeyUp,
@@ -72,6 +71,7 @@ export const TextInput = forwardRef(function TextInput(
     direction = 'column',
     width,
     flexShrink,
+    colorLabel,
   }: TextInputProps,
   ref
 ) {
@@ -85,7 +85,7 @@ export const TextInput = forwardRef(function TextInput(
   const onChange = useDebouncedCallback(
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     _onChange ?? (() => {}),
-    env.NEXT_PUBLIC_E2E_TEST && !forceDebounce ? 0 : debounceTimeout
+    env.NEXT_PUBLIC_E2E_TEST ? 0 : debounceTimeout
   )
 
   useEffect(() => {
@@ -152,7 +152,14 @@ export const TextInput = forwardRef(function TextInput(
       flexShrink={flexShrink}
     >
       {label && (
-        <FormLabel display="flex" flexShrink={0} gap="1" mb="0" mr="0">
+        <FormLabel
+          display="flex"
+          flexShrink={0}
+          gap="1"
+          mb="0"
+          mr="0"
+          color={colorLabel}
+        >
           {label}{' '}
           {moreInfoTooltip && (
             <MoreInfoTooltip>{moreInfoTooltip}</MoreInfoTooltip>

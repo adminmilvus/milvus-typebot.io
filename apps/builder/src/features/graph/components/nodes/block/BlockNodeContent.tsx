@@ -39,6 +39,7 @@ import { LogicBlockType } from '@typebot.io/schemas/features/blocks/logic/consta
 import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integrations/constants'
 import { ForgedBlockNodeContent } from '@/features/forge/components/ForgedBlockNodeContent'
 import { OpenAINodeBody } from '@/features/blocks/integrations/openai/components/OpenAINodeBody'
+import { MilvusBlockType } from '@typebot.io/schemas/features/blocks/milvus/constants'
 
 type Props = {
   block: BlockV6
@@ -130,6 +131,44 @@ export const BlockNodeContent = ({
     case IntegrationBlockType.WEBHOOK: {
       return <WebhookContent block={block} />
     }
+    case MilvusBlockType.CREATE_TICKET: {
+      return (
+        <WebhookContent block={block} type={MilvusBlockType.CREATE_TICKET} />
+      )
+    }
+    case MilvusBlockType.BASE_BY_TAG: {
+      return <WebhookContent block={block} type={MilvusBlockType.BASE_BY_TAG} />
+    }
+    case MilvusBlockType.ARTICLE_BY_ID: {
+      return (
+        <WebhookContent block={block} type={MilvusBlockType.ARTICLE_BY_ID} />
+      )
+    }
+    case MilvusBlockType.CLIENT_BY_DOCUMENTO: {
+      return (
+        <WebhookContent
+          block={block}
+          type={MilvusBlockType.CLIENT_BY_DOCUMENTO}
+        />
+      )
+    }
+    case MilvusBlockType.CLIENT_BY_EMAIL: {
+      return (
+        <WebhookContent block={block} type={MilvusBlockType.CLIENT_BY_EMAIL} />
+      )
+    }
+    case MilvusBlockType.SPEAK_WITH_ATTENDANT: {
+      return (
+        <WebhookContent
+          block={block}
+          type={MilvusBlockType.SPEAK_WITH_ATTENDANT}
+        />
+      )
+    }
+    case MilvusBlockType.CLOSE_CHAT: {
+      return <WebhookContent block={block} type={MilvusBlockType.CLOSE_CHAT} />
+    }
+
     case IntegrationBlockType.ZAPIER: {
       return <ZapierContent block={block} />
     }

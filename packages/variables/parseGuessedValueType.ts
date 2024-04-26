@@ -1,4 +1,4 @@
-import { Variable } from './types'
+import { Variable } from '@typebot.io/schemas'
 
 export const parseGuessedValueType = (
   value: Variable['value']

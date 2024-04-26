@@ -6,7 +6,7 @@ type Props = {
 }
 export const findResult = ({ id }: Props) =>
   prisma.result.findFirst({
-    where: { id, isArchived: { not: true } },
+    where: { id },
     select: {
       id: true,
       variables: true,

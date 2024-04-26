@@ -35,15 +35,14 @@ import { MultiplePictureChoice } from '@/features/blocks/inputs/pictureChoice/Mu
 import { formattedMessages } from '@/utils/formattedMessagesSignal'
 import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/constants'
 import { defaultPaymentInputOptions } from '@typebot.io/schemas/features/blocks/inputs/payment/constants'
-import { persist } from '@/utils/persist'
-import { defaultGuestAvatarIsEnabled } from '@typebot.io/schemas/features/typebot/theme/constants'
+import { defaultTheme } from '@typebot.io/schemas/features/typebot/theme/constants'
 
 type Props = {
   ref: HTMLDivElement | undefined
   block: NonNullable<ContinueChatResponse['input']>
   hasHostAvatar: boolean
   guestAvatar?: NonNullable<Theme['chat']>['guestAvatar']
-  chunkIndex: number
+  inputIndex: number
   context: BotContext
   isInputPrefillEnabled: boolean
   hasError: boolean
@@ -53,10 +52,7 @@ type Props = {
 }
 
 export const InputChatBlock = (props: Props) => {
-  const [answer, setAnswer] = persist(createSignal<string>(), {
-    key: `typebot-${props.context.typebot.id}-input-${props.chunkIndex}`,
-    storage: props.context.storage,
-  })
+  const [answer, setAnswer] = createSignal<string>()
   const [formattedMessage, setFormattedMessage] = createSignal<string>()
 
   const handleSubmit = async ({ label, value }: InputSubmitContent) => {
@@ -71,7 +67,7 @@ export const InputChatBlock = (props: Props) => {
 
   createEffect(() => {
     const formattedMessage = formattedMessages().findLast(
-      (message) => props.chunkIndex === message.inputIndex
+      (message) => props.inputIndex === message.inputIndex
     )?.formattedMessage
     if (formattedMessage) setFormattedMessage(formattedMessage)
   })
@@ -82,7 +78,8 @@ export const InputChatBlock = (props: Props) => {
         <GuestBubble
           message={formattedMessage() ?? (answer() as string)}
           showAvatar={
-            props.guestAvatar?.isEnabled ?? defaultGuestAvatarIsEnabled
+            props.guestAvatar?.isEnabled ??
+            defaultTheme.chat.guestAvatar.isEnabled
           }
           avatarSrc={props.guestAvatar?.url && props.guestAvatar.url}
         />
@@ -104,7 +101,7 @@ export const InputChatBlock = (props: Props) => {
           <Input
             context={props.context}
             block={props.block}
-            chunkIndex={props.chunkIndex}
+            inputIndex={props.inputIndex}
             isInputPrefillEnabled={props.isInputPrefillEnabled}
             existingAnswer={props.hasError ? answer() : undefined}
             onTransitionEnd={props.onTransitionEnd}
@@ -120,7 +117,7 @@ export const InputChatBlock = (props: Props) => {
 const Input = (props: {
   context: BotContext
   block: NonNullable<ContinueChatResponse['input']>
-  chunkIndex: number
+  inputIndex: number
   isInputPrefillEnabled: boolean
   existingAnswer?: string
   onTransitionEnd: () => void
@@ -192,7 +189,7 @@ const Input = (props: {
           <Switch>
             <Match when={!block.options?.isMultipleChoice}>
               <Buttons
-                chunkIndex={props.chunkIndex}
+                inputIndex={props.inputIndex}
                 defaultItems={block.items}
                 options={block.options}
                 onSubmit={onSubmit}
@@ -200,6 +197,7 @@ const Input = (props: {
             </Match>
             <Match when={block.options?.isMultipleChoice}>
               <MultipleChoicesForm
+                inputIndex={props.inputIndex}
                 defaultItems={block.items}
                 options={block.options}
                 onSubmit={onSubmit}

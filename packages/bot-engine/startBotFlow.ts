@@ -14,6 +14,7 @@ type Props = {
   state: SessionState
   startFrom?: StartFrom
   startTime?: number
+  chat_id?: string
 }
 
 export const startBotFlow = async ({
@@ -21,6 +22,7 @@ export const startBotFlow = async ({
   state,
   startFrom,
   startTime,
+  chat_id,
 }: Props): Promise<
   ContinueChatResponse & {
     newSessionState: SessionState
@@ -43,6 +45,7 @@ export const startBotFlow = async ({
       state: newSessionState,
       visitedEdges,
       startTime,
+      chat_id,
     })
   }
   const firstEdgeId = getFirstEdgeId({
@@ -59,5 +62,6 @@ export const startBotFlow = async ({
     state: newSessionState,
     visitedEdges,
     startTime,
+    chat_id,
   })
 }

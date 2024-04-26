@@ -11,11 +11,10 @@ import {
   ChatLog,
   ExecutableHttpRequest,
   AnswerInSessionState,
-  TypebotInSession,
 } from '@typebot.io/schemas'
 import { stringify } from 'qs'
 import { isDefined, isEmpty, isNotDefined, omit } from '@typebot.io/lib'
-import ky, { HTTPError, Options, TimeoutError } from 'ky'
+import got, { Method, HTTPError, OptionsInit } from 'got'
 import { resumeWebhookExecution } from './resumeWebhookExecution'
 import { ExecuteIntegrationResponse } from '../../../types'
 import { parseVariables } from '@typebot.io/variables/parseVariables'
@@ -27,7 +26,8 @@ import {
   maxTimeout,
 } from '@typebot.io/schemas/features/blocks/integrations/webhook/constants'
 import { env } from '@typebot.io/env'
-import { parseAnswers } from '@typebot.io/results/parseAnswers'
+import { parseAnswers } from '@typebot.io/lib/results/parseAnswers'
+import { MilvusBlock } from '@typebot.io/schemas/features/blocks/milvus'
 
 type ParsedWebhook = ExecutableHttpRequest & {
   basicAuth: { username?: string; password?: string }
@@ -45,11 +45,20 @@ export const longReqTimeoutWhitelist = [
 export const webhookSuccessDescription = `Webhook successfuly executed.`
 export const webhookErrorDescription = `Webhook returned an error.`
 
-type Params = { disableRequestTimeout?: boolean; timeout?: number }
+type Params = {
+  disableRequestTimeout?: boolean
+  timeout?: number
+  chat_id?: string
+}
 
 export const executeWebhookBlock = async (
   state: SessionState,
-  block: HttpRequestBlock | ZapierBlock | MakeComBlock | PabblyConnectBlock,
+  block:
+    | HttpRequestBlock
+    | ZapierBlock
+    | MakeComBlock
+    | PabblyConnectBlock
+    | MilvusBlock,
   params: Params = {}
 ): Promise<ExecuteIntegrationResponse> => {
   const logs: ChatLog[] = []
@@ -61,11 +70,9 @@ export const executeWebhookBlock = async (
         })) as HttpRequest | null)
       : null)
   if (!webhook) return { outgoingEdgeId: block.outgoingEdgeId }
-  const parsedWebhook = await parseWebhookAttributes({
+  const parsedWebhook = await parseWebhookAttributes(state)({
     webhook,
-    isCustomBody: block.options?.isCustomBody,
-    typebot: state.typebotsQueue[0].typebot,
-    answers: state.typebotsQueue[0].answers,
+    isCustomBody: true,
   })
   if (!parsedWebhook) {
     logs.push({
@@ -85,6 +92,9 @@ export const executeWebhookBlock = async (
         },
       ],
     }
+
+  params.chat_id = state.chat_id
+
   const {
     response: webhookResponse,
     logs: executeWebhookLogs,
@@ -107,69 +117,69 @@ export const executeWebhookBlock = async (
 
 const checkIfBodyIsAVariable = (body: string) => /^{{.+}}$/.test(body)
 
-export const parseWebhookAttributes = async ({
-  webhook,
-  isCustomBody,
-  typebot,
-  answers,
-}: {
-  webhook: HttpRequest
-  isCustomBody?: boolean
-  typebot: TypebotInSession
-  answers: AnswerInSessionState[]
-}): Promise<ParsedWebhook | undefined> => {
-  if (!webhook.url) return
-  const basicAuth: { username?: string; password?: string } = {}
-  const basicAuthHeaderIdx = webhook.headers?.findIndex(
-    (h) =>
-      h.key?.toLowerCase() === 'authorization' &&
-      h.value?.toLowerCase()?.includes('basic')
-  )
-  const isUsernamePasswordBasicAuth =
-    basicAuthHeaderIdx !== -1 &&
-    isDefined(basicAuthHeaderIdx) &&
-    webhook.headers?.at(basicAuthHeaderIdx)?.value?.includes(':')
-  if (isUsernamePasswordBasicAuth) {
-    const [username, password] =
-      webhook.headers?.at(basicAuthHeaderIdx)?.value?.slice(6).split(':') ?? []
-    basicAuth.username = username
-    basicAuth.password = password
-    webhook.headers?.splice(basicAuthHeaderIdx, 1)
-  }
-  const headers = convertKeyValueTableToObject(
-    webhook.headers,
-    typebot.variables
-  ) as ExecutableHttpRequest['headers'] | undefined
-  const queryParams = stringify(
-    convertKeyValueTableToObject(webhook.queryParams, typebot.variables)
-  )
-  const bodyContent = await getBodyContent({
-    body: webhook.body,
-    answers,
-    variables: typebot.variables,
+const parseWebhookAttributes =
+  (state: SessionState) =>
+  async ({
+    webhook,
     isCustomBody,
-  })
-  const method = webhook.method ?? defaultWebhookAttributes.method
-  const { data: body, isJson } =
-    bodyContent && method !== HttpMethod.GET
-      ? safeJsonParse(
-          parseVariables(typebot.variables, {
-            isInsideJson: !checkIfBodyIsAVariable(bodyContent),
-          })(bodyContent)
-        )
-      : { data: undefined, isJson: false }
+  }: {
+    webhook: HttpRequest
+    isCustomBody?: boolean
+  }): Promise<ParsedWebhook | undefined> => {
+    if (!webhook.url) return
+    const { typebot } = state.typebotsQueue[0]
+    const basicAuth: { username?: string; password?: string } = {}
+    const basicAuthHeaderIdx = webhook.headers?.findIndex(
+      (h) =>
+        h.key?.toLowerCase() === 'authorization' &&
+        h.value?.toLowerCase()?.includes('basic')
+    )
+    const isUsernamePasswordBasicAuth =
+      basicAuthHeaderIdx !== -1 &&
+      isDefined(basicAuthHeaderIdx) &&
+      webhook.headers?.at(basicAuthHeaderIdx)?.value?.includes(':')
+    if (isUsernamePasswordBasicAuth) {
+      const [username, password] =
+        webhook.headers?.at(basicAuthHeaderIdx)?.value?.slice(6).split(':') ??
+        []
+      basicAuth.username = username
+      basicAuth.password = password
+      webhook.headers?.splice(basicAuthHeaderIdx, 1)
+    }
+    const headers = convertKeyValueTableToObject(
+      webhook.headers,
+      typebot.variables
+    ) as ExecutableHttpRequest['headers'] | undefined
+    const queryParams = stringify(
+      convertKeyValueTableToObject(webhook.queryParams, typebot.variables)
+    )
+    const bodyContent = await getBodyContent({
+      body: webhook.body,
+      answers: state.typebotsQueue[0].answers,
+      variables: typebot.variables,
+      isCustomBody,
+    })
+    const method = webhook.method ?? defaultWebhookAttributes.method
+    const { data: body, isJson } =
+      bodyContent && method !== HttpMethod.GET
+        ? safeJsonParse(
+            parseVariables(typebot.variables, {
+              isInsideJson: !checkIfBodyIsAVariable(bodyContent),
+            })(bodyContent)
+          )
+        : { data: undefined, isJson: false }
 
-  return {
-    url: parseVariables(typebot.variables)(
-      webhook.url + (queryParams !== '' ? `?${queryParams}` : '')
-    ),
-    basicAuth,
-    method,
-    headers,
-    body,
-    isJson,
+    return {
+      url: parseVariables(typebot.variables)(
+        webhook.url + (queryParams !== '' ? `?${queryParams}` : '')
+      ),
+      basicAuth,
+      method,
+      headers,
+      body,
+      isJson,
+    }
   }
-}
 
 export const executeWebhook = async (
   webhook: ParsedWebhook,
@@ -181,8 +191,10 @@ export const executeWebhook = async (
 }> => {
   const logs: ChatLog[] = []
 
-  const { headers, url, method, basicAuth, isJson } = webhook
+  let { headers, url, method, basicAuth, body, isJson } = webhook
   const contentType = headers ? headers['Content-Type'] : undefined
+
+  if (params.chat_id && headers) headers['X-Chat-id'] = params.chat_id
 
   const isLongRequest = params.disableRequestTimeout
     ? true
@@ -190,78 +202,78 @@ export const executeWebhook = async (
         url?.includes(whiteListedUrl)
       )
 
-  const isFormData = contentType?.includes('x-www-form-urlencoded')
-
-  let body = webhook.body
-
-  if (isFormData && isJson) body = parseFormDataBody(body as object)
-
   const request = {
     url,
-    method,
+    method: method as Method,
     headers: headers ?? {},
     ...(basicAuth ?? {}),
-    json: !isFormData && body && isJson ? body : undefined,
-    body: (isFormData && body ? body : undefined) as any,
-    timeout: isNotDefined(env.CHAT_API_TIMEOUT)
-      ? undefined
-      : params.timeout && params.timeout !== defaultTimeout
-      ? Math.min(params.timeout, maxTimeout) * 1000
-      : isLongRequest
-      ? maxTimeout * 1000
-      : defaultTimeout * 1000,
-  } satisfies Options & { url: string; body: any }
+    json:
+      !contentType?.includes('x-www-form-urlencoded') && body && isJson
+        ? body
+        : undefined,
+    form:
+      contentType?.includes('x-www-form-urlencoded') && body ? body : undefined,
+    body: body && !isJson ? (body as string) : undefined,
+    timeout: {
+      response: isNotDefined(env.CHAT_API_TIMEOUT)
+        ? undefined
+        : params.timeout && params.timeout !== defaultTimeout
+        ? Math.min(params.timeout, maxTimeout) * 1000
+        : isLongRequest
+        ? maxTimeout * 1000
+        : defaultTimeout * 1000,
+    },
+  } satisfies OptionsInit
 
   try {
-    const response = await ky(request.url, omit(request, 'url'))
-    const body = await response.text()
+    const response = await got(request.url, omit(request, 'url'))
     logs.push({
       status: 'success',
       description: webhookSuccessDescription,
       details: {
-        statusCode: response.status,
-        response: safeJsonParse(body).data,
+        statusCode: response.statusCode,
+        response: safeJsonParse(response.body).data,
         request,
       },
     })
     return {
       response: {
-        statusCode: response.status,
-        data: safeJsonParse(body).data,
+        statusCode: response.statusCode,
+        data: safeJsonParse(response.body).data,
       },
       logs,
       startTimeShouldBeUpdated: true,
     }
   } catch (error) {
     if (error instanceof HTTPError) {
-      const responseBody = await error.response.text()
       const response = {
-        statusCode: error.response.status,
-        data: safeJsonParse(responseBody).data,
+        statusCode: error.response.statusCode,
+        data: safeJsonParse(error.response.body as string).data,
       }
       logs.push({
         status: 'error',
         description: webhookErrorDescription,
         details: {
-          statusCode: error.response.status,
+          statusCode: error.response.statusCode,
           request,
           response,
         },
       })
       return { response, logs, startTimeShouldBeUpdated: true }
     }
-    if (error instanceof TimeoutError) {
+    if (
+      typeof error === 'object' &&
+      error &&
+      'code' in error &&
+      error.code === 'ETIMEDOUT'
+    ) {
       const response = {
         statusCode: 408,
-        data: {
-          message: `Request timed out. (${(request.timeout ?? 0) / 1000}ms)`,
-        },
+        data: { message: `Request timed out.` },
       }
       logs.push({
         status: 'error',
-        description: `Webhook request timed out. (${
-          (request.timeout ?? 0) / 1000
-        }s)`,
+        description: `Webhook request timed out. (${request.timeout.response}ms)`,
         details: {
           response,
           request,
@@ -324,18 +336,10 @@ export const convertKeyValueTableToObject = (
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const safeJsonParse = (json: unknown): { data: any; isJson: boolean } => {
+const safeJsonParse = (json: string): { data: any; isJson: boolean } => {
   try {
-    return { data: JSON.parse(json as string), isJson: true }
+    return { data: JSON.parse(json), isJson: true }
   } catch (err) {
     return { data: json, isJson: false }
   }
-}
-
-const parseFormDataBody = (body: object) => {
-  const searchParams = new URLSearchParams()
-  Object.entries(body as object).forEach(([key, value]) => {
-    searchParams.set(key, value)
-  })
-  return searchParams
 }

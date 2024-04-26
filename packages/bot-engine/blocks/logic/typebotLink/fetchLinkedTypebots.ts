@@ -1,19 +1,20 @@
 import prisma from '@typebot.io/lib/prisma'
+import { User } from '@typebot.io/prisma'
 
 type Props = {
   isPreview?: boolean
   typebotIds: string[]
-  userId: string | undefined
+  user?: User
 }
 
 export const fetchLinkedTypebots = async ({
-  userId,
+  user,
   isPreview,
   typebotIds,
 }: Props) => {
-  if (!userId || !isPreview)
+  if (!user || !isPreview)
     return prisma.publicTypebot.findMany({
-      where: { typebotId: { in: typebotIds } },
+      where: { id: { in: typebotIds } },
     })
   const linkedTypebots = await prisma.typebot.findMany({
     where: { id: { in: typebotIds } },
@@ -38,7 +39,7 @@ export const fetchLinkedTypebots = async ({
   return linkedTypebots.filter(
     (typebot) =>
       typebot.collaborators.some(
-        (collaborator) => collaborator.userId === userId
-      ) || typebot.workspace.members.some((member) => member.userId === userId)
+        (collaborator) => collaborator.userId === user.id
+      ) || typebot.workspace.members.some((member) => member.userId === user.id)
   )
 }

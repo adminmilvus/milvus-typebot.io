@@ -1,4 +1,4 @@
-/** @jsxImportSource react */
+import React from 'react'
 
 export const ZemanticAiLogo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" {...props}>

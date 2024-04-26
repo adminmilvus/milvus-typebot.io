@@ -1,9 +1,9 @@
 import { safeStringify } from '@typebot.io/lib/safeStringify'
-import { Variable } from './types'
+import { StartChatInput, Variable } from '@typebot.io/schemas'
 
 export const prefillVariables = (
   variables: Variable[],
-  prefilledVariables: Record<string, any>
+  prefilledVariables: NonNullable<StartChatInput['prefilledVariables']>
 ): Variable[] =>
   variables.map((variable) => {
     const prefilledVariable = prefilledVariables[variable.name]

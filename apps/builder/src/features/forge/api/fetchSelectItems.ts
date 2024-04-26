@@ -3,14 +3,13 @@ import { authenticatedProcedure } from '@/helpers/server/trpc'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { isReadWorkspaceFobidden } from '@/features/workspace/helpers/isReadWorkspaceFobidden'
-import { forgedBlocks } from '@typebot.io/forge-repository/definitions'
-import { forgedBlockIds } from '@typebot.io/forge-repository/constants'
+import { forgedBlocks } from '@typebot.io/forge-schemas'
 import { decrypt } from '@typebot.io/lib/api/encryption/decrypt'
 
 export const fetchSelectItems = authenticatedProcedure
   .input(
     z.object({
-      integrationId: z.enum(forgedBlockIds),
+      integrationId: z.string(),
       fetcherId: z.string(),
       options: z.any(),
       workspaceId: z.string(),
@@ -56,7 +55,7 @@ export const fetchSelectItems = authenticatedProcedure
 
       const credentialsData = await decrypt(credentials.data, credentials.iv)
 
-      const blockDef = forgedBlocks[integrationId]
+      const blockDef = forgedBlocks.find((b) => b.id === integrationId)
 
       const fetchers = (blockDef?.fetchers ?? []).concat(
         blockDef?.actions.flatMap((action) => action.fetchers ?? []) ?? []

@@ -57,20 +57,19 @@ export const PhoneInput = (props: PhoneInputProps) => {
   }
 
   const checkIfInputIsValid = () =>
-    inputRef?.value !== '' && inputRef?.reportValidity()
+    inputValue() !== '' && inputRef?.reportValidity()
 
   const submit = () => {
     const selectedCountryDialCode = phoneCountries.find(
       (country) => country.code === selectedCountryCode()
     )?.dial_code
-    if (checkIfInputIsValid()) {
-      const val = inputRef?.value ?? inputValue()
+    if (checkIfInputIsValid())
       props.onSubmit({
-        value: val.startsWith('+')
-          ? val
-          : `${selectedCountryDialCode ?? ''}${val}`,
+        value: inputValue().startsWith('+')
+          ? inputValue()
+          : `${selectedCountryDialCode ?? ''}${inputValue()}`,
       })
-    } else inputRef?.focus()
+    else inputRef?.focus()
   }
 
   const submitWhenEnter = (e: KeyboardEvent) => {
@@ -90,7 +89,7 @@ export const PhoneInput = (props: PhoneInputProps) => {
   }
 
   onMount(() => {
-    if (!isMobile() && inputRef) inputRef.focus({ preventScroll: true })
+    if (!isMobile() && inputRef) inputRef.focus()
     window.addEventListener('message', processIncomingEvent)
   })
 
@@ -158,7 +157,7 @@ export const PhoneInput = (props: PhoneInputProps) => {
       </div>
 
       <SendButton type="button" class="my-2 ml-2" on:click={submit}>
-        {props.labels?.button}
+        {props.labels?.button ?? defaultPhoneInputOptions.labels.button}
       </SendButton>
     </div>
   )

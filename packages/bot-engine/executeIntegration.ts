@@ -12,10 +12,15 @@ import { executeOpenAIBlock } from './blocks/integrations/legacy/openai/executeO
 import { executeForgedBlock } from './forge/executeForgedBlock'
 import { isNotDefined } from '@typebot.io/lib'
 import { env } from '@typebot.io/env'
+import { MilvusBlock } from '@typebot.io/schemas/features/blocks/milvus'
+import { MilvusBlockType } from '@typebot.io/schemas/features/blocks/milvus/constants'
 
 export const executeIntegration =
   (state: SessionState) =>
-  async (block: IntegrationBlock): Promise<ExecuteIntegrationResponse> => {
+  async (
+    block: IntegrationBlock | MilvusBlock
+  ): Promise<ExecuteIntegrationResponse> => {
+    //chat_id is in the state
     switch (block.type) {
       case IntegrationBlockType.GOOGLE_SHEETS:
         return {
@@ -43,6 +48,50 @@ export const executeIntegration =
             disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
           })),
         }
+
+      case MilvusBlockType.CREATE_TICKET:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+      case MilvusBlockType.BASE_BY_TAG:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+      case MilvusBlockType.ARTICLE_BY_ID:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+      case MilvusBlockType.CLIENT_BY_DOCUMENTO:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+      case MilvusBlockType.CLIENT_BY_EMAIL:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+      case MilvusBlockType.SPEAK_WITH_ATTENDANT:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+      case MilvusBlockType.CLOSE_CHAT:
+        return {
+          ...(await executeWebhookBlock(state, block, {
+            disableRequestTimeout: isNotDefined(env.CHAT_API_TIMEOUT),
+          })),
+        }
+
       case IntegrationBlockType.OPEN_AI:
         return {
           ...(await executeOpenAIBlock(state, block)),

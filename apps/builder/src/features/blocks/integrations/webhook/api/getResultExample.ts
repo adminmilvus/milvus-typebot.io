@@ -6,7 +6,7 @@ import { Typebot } from '@typebot.io/schemas'
 import { z } from 'zod'
 import { fetchLinkedTypebots } from '@/features/blocks/logic/typebotLink/helpers/fetchLinkedTypebots'
 import { parseSampleResult } from '@typebot.io/bot-engine/blocks/integrations/webhook/parseSampleResult'
-import { getBlockById } from '@typebot.io/schemas/helpers'
+import { getBlockById } from '@typebot.io/lib/getBlockById'
 
 export const getResultExample = authenticatedProcedure
   .meta({
@@ -53,10 +53,9 @@ export const getResultExample = authenticatedProcedure
     const linkedTypebots = await fetchLinkedTypebots(typebot, user)
 
     return {
-      resultExample: await parseSampleResult(
-        typebot,
-        linkedTypebots,
-        user.email ?? undefined
-      )(group.id, typebot.variables),
+      resultExample: await parseSampleResult(typebot, linkedTypebots)(
+        group.id,
+        typebot.variables
+      ),
     }
   })

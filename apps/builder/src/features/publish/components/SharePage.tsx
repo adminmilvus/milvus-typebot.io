@@ -97,7 +97,7 @@ export const SharePage = () => {
         <Stack maxW="1000px" w="full" pt="10" spacing={10}>
           <Stack spacing={4} align="flex-start">
             <Heading fontSize="2xl" as="h1">
-              Your typebot link
+              Seu link Typebot
             </Heading>
             {typebot && (
               <EditableUrl
@@ -105,6 +105,7 @@ export const SharePage = () => {
                 pathname={publicId}
                 isValid={checkIfPublicIdIsValid}
                 onPathnameChange={handlePublicIdChange}
+                isDisabled={true}
               />
             )}
             {typebot?.customDomain && (
@@ -114,6 +115,7 @@ export const SharePage = () => {
                   pathname={typebot.customDomain.split('/')[1]}
                   isValid={checkIfPathnameIsValid}
                   onPathnameChange={handlePathnameChange}
+                  isDisabled={false}
                 />
                 <IconButton
                   icon={<TrashIcon />}
@@ -142,7 +144,7 @@ export const SharePage = () => {
                     limitReachedType={t('billing.limitMessage.customDomain')}
                     excludedPlans={[Plan.STARTER]}
                   >
-                    <Text mr="2">Add my domain</Text>{' '}
+                    <Text mr="2">Adicione seu dominio</Text>{' '}
                     <LockTag plan={Plan.PRO} />
                   </UpgradeButton>
                 )}
@@ -152,7 +154,7 @@ export const SharePage = () => {
 
           <Stack spacing={4}>
             <Heading fontSize="2xl" as="h1">
-              Embed your typebot
+              Use seu typebot
             </Heading>
             <Wrap spacing={7}>
               {integrationsList.map((IntegrationButton, idx) => (

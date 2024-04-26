@@ -1,6 +1,7 @@
 import { router } from '@/helpers/server/trpc'
 import { listTypebots } from './listTypebots'
 import { createTypebot } from './createTypebot'
+import { createUser } from './createUser'
 import { updateTypebot } from './updateTypebot'
 import { getTypebot } from './getTypebot'
 import { getPublishedTypebot } from './getPublishedTypebot'
@@ -19,4 +20,5 @@ export const typebotRouter = router({
   listTypebots,
   deleteTypebot,
   importTypebot,
+  createUser,
 })

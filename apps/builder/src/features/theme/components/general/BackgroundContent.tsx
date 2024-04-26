@@ -16,8 +16,7 @@ import React from 'react'
 import { ColorPicker } from '../../../../components/ColorPicker'
 import {
   BackgroundType,
-  defaultBackgroundColor,
-  defaultBackgroundType,
+  defaultTheme,
 } from '@typebot.io/schemas/features/typebot/theme/constants'
 import { useTranslate } from '@tolgee/react'
 
@@ -35,7 +34,10 @@ export const BackgroundContent = ({
   const handleContentChange = (content: string) =>
     onBackgroundContentChange(content)
 
-  if ((background?.type ?? defaultBackgroundType) === BackgroundType.IMAGE) {
+  if (
+    (background?.type ?? defaultTheme.general.background.type) ===
+    BackgroundType.IMAGE
+  ) {
     if (!typebot) return null
     return (
       <Popover isLazy placement="top">
@@ -74,12 +76,15 @@ export const BackgroundContent = ({
       </Popover>
     )
   }
-  if ((background?.type ?? defaultBackgroundType) === BackgroundType.COLOR) {
+  if (
+    (background?.type ?? defaultTheme.general.background.type) ===
+    BackgroundType.COLOR
+  ) {
     return (
       <Flex justify="space-between" align="center">
         <Text>{t('theme.sideMenu.global.background.color')}</Text>
         <ColorPicker
-          value={background?.content ?? defaultBackgroundColor}
+          value={background?.content ?? defaultTheme.general.background.content}
           onColorChange={handleContentChange}
         />
       </Flex>

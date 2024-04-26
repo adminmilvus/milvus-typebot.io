@@ -1,30 +1,25 @@
-import { getServerSession } from 'next-auth'
 import { User } from '@typebot.io/prisma'
 import { isNotDefined } from '@typebot.io/lib'
 import { sign } from 'jsonwebtoken'
-import { getAuthOptions } from '../api/auth/[...nextauth]'
 import { GetServerSidePropsContext } from 'next'
 import { env } from '@typebot.io/env'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 export default function Page() {
   return null
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(
-    context.req,
-    context.res,
-    getAuthOptions({})
-  )
+  const user = getAuthenticatedUser()
   const feedbackId = context.query.feedbackId?.toString() as string
-  if (isNotDefined(session?.user))
+  if (isNotDefined(user))
     return {
       redirect: {
         permanent: false,
         destination: `/signin?redirectPath=%2Ffeedback%2F${feedbackId}`,
       },
     }
-  const sleekplanToken = createSSOToken(session?.user as User)
+  const sleekplanToken = createSSOToken(user as User)
   return {
     redirect: {
       permanent: false,

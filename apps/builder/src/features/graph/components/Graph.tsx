@@ -23,6 +23,7 @@ import { isSelectBoxIntersectingWithElement } from '../helpers/isSelectBoxInters
 import { useGroupsStore } from '../hooks/useGroupsStore'
 import { useShallow } from 'zustand/react/shallow'
 import { projectMouse } from '../helpers/projectMouse'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useUser } from '@/features/account/hooks/useUser'
 import { GraphNavigation } from '@typebot.io/prisma'
 
@@ -148,7 +149,7 @@ export const Graph = ({
     )
     const id = createId()
     updateGroupCoordinates(id, coordinates)
-    const newBlockId = createGroup({
+    createGroup({
       id,
       ...coordinates,
       block: draggedBlock ?? (draggedBlockType as BlockV6['type']),
@@ -156,7 +157,6 @@ export const Graph = ({
     })
     setDraggedBlock(undefined)
     setDraggedBlockType(undefined)
-    if (newBlockId) setOpenedBlockId(newBlockId)
   }
 
   const handleCaptureMouseDown = (e: MouseEvent) => {
@@ -305,6 +305,8 @@ export const Graph = ({
     setAutoMoveDirection(undefined)
   }
 
+  useKeyboardShortcuts({})
+
   useEventListener('keydown', (e) => {
     if (e.key === ' ') setIsDraggingGraph(true)
   })
@@ -314,16 +316,6 @@ export const Graph = ({
       setIsDragging(false)
     }
   })
-
-  useEventListener(
-    'blur',
-    () => {
-      setIsDraggingGraph(false)
-      setIsDragging(false)
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window as any
-  )
 
   useEventListener('mousedown', handleCaptureMouseDown, undefined, {
     capture: true,

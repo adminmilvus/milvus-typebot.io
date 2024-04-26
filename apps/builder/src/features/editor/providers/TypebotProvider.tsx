@@ -1,9 +1,4 @@
-import {
-  PublicTypebot,
-  PublicTypebotV6,
-  TypebotV6,
-  typebotV6Schema,
-} from '@typebot.io/schemas'
+import { PublicTypebot, PublicTypebotV6, TypebotV6 } from '@typebot.io/schemas'
 import { Router } from 'next/router'
 import {
   createContext,
@@ -220,12 +215,11 @@ export const TypebotProvider = ({
       }
       if (dequal(omit(typebot, 'updatedAt'), omit(typebotToSave, 'updatedAt')))
         return
-      const newParsedTypebot = typebotV6Schema.parse({ ...typebotToSave })
-      setLocalTypebot(newParsedTypebot)
+      setLocalTypebot({ ...typebotToSave })
       try {
         await updateTypebot({
-          typebotId: newParsedTypebot.id,
-          typebot: newParsedTypebot,
+          typebotId: typebotToSave.id,
+          typebot: typebotToSave,
         })
       } catch {
         setLocalTypebot({

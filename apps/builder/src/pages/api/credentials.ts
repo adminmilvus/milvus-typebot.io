@@ -1,7 +1,6 @@
 import prisma from '@typebot.io/lib/prisma'
 import { Credentials } from '@typebot.io/schemas'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
 import {
   badRequest,
   forbidden,
@@ -9,9 +8,10 @@ import {
   notAuthenticated,
 } from '@typebot.io/lib/api'
 import { encrypt } from '@typebot.io/lib/api/encryption/encrypt'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const user = await getAuthenticatedUser(req, res)
+  const user = getAuthenticatedUser()
   if (!user) return notAuthenticated(res)
   const workspaceId = req.query.workspaceId as string | undefined
   if (!workspaceId) return badRequest(res)

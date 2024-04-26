@@ -5,13 +5,13 @@ import {
   RuntimeOptions,
   SessionState,
 } from '@typebot.io/schemas'
-import { isNotEmpty } from '@typebot.io/lib'
 import {
   isBubbleBlock,
   isInputBlock,
   isIntegrationBlock,
   isLogicBlock,
-} from '@typebot.io/schemas/helpers'
+  isNotEmpty,
+} from '@typebot.io/lib'
 import { getNextGroup } from './getNextGroup'
 import { executeLogic } from './executeLogic'
 import { executeIntegration } from './executeIntegration'
@@ -40,6 +40,7 @@ type ContextProps = {
   firstBubbleWasStreamed?: boolean
   visitedEdges: VisitedEdge[]
   startTime?: number
+  chat_id?: string
 }
 
 export const executeGroup = async (
@@ -52,6 +53,7 @@ export const executeGroup = async (
     currentLastBubbleId,
     firstBubbleWasStreamed,
     startTime,
+    chat_id,
   }: ContextProps
 ): Promise<
   ContinueChatResponse & {
@@ -111,6 +113,8 @@ export const executeGroup = async (
         logs,
         visitedEdges,
       }
+
+    newSessionState.chat_id = chat_id
     const executionResponse = (
       isLogicBlock(block)
         ? await executeLogic(newSessionState)(block)
@@ -199,6 +203,7 @@ export const executeGroup = async (
     },
     currentLastBubbleId: lastBubbleBlockId,
     startTime: newStartTime,
+    chat_id,
   })
 }
 
@@ -226,8 +231,7 @@ export const parseInput =
       }
       case InputBlockType.NUMBER: {
         const parsedBlock = deepParseVariables(
-          state.typebotsQueue[0].typebot.variables,
-          { removeEmptyStrings: true }
+          state.typebotsQueue[0].typebot.variables
         )({
           ...block,
           prefilledValue: getPrefilledInputValue(
@@ -255,8 +259,7 @@ export const parseInput =
       }
       case InputBlockType.RATING: {
         const parsedBlock = deepParseVariables(
-          state.typebotsQueue[0].typebot.variables,
-          { removeEmptyStrings: true }
+          state.typebotsQueue[0].typebot.variables
         )({
           ...block,
           prefilledValue: getPrefilledInputValue(
@@ -274,9 +277,7 @@ export const parseInput =
         }
       }
       default: {
-        return deepParseVariables(state.typebotsQueue[0].typebot.variables, {
-          removeEmptyStrings: true,
-        })({
+        return deepParseVariables(state.typebotsQueue[0].typebot.variables)({
           ...block,
           runtimeOptions: await computeRuntimeOptions(state)(block),
           prefilledValue: getPrefilledInputValue(

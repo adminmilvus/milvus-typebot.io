@@ -5,7 +5,6 @@ import {
   Stack,
   HStack,
   Text,
-  Spinner,
   Alert,
   Flex,
   AlertIcon,
@@ -18,49 +17,42 @@ import {
   getProviders,
   LiteralUnion,
   signIn,
-  useSession,
 } from 'next-auth/react'
 import { DividerWithText } from './DividerWithText'
-import { SocialLoginButtons } from './SocialLoginButtons'
+// import { SocialLoginButtons } from './SocialLoginButtons'
 import { useRouter } from 'next/router'
 import { BuiltInProviderType } from 'next-auth/providers'
 import { useToast } from '@/hooks/useToast'
-import { TextLink } from '@/components/TextLink'
+// import { TextLink } from '@/components/TextLink'
 import { SignInError } from './SignInError'
 import { useTranslate } from '@tolgee/react'
-import { sanitizeUrl } from '@braintree/sanitize-url'
 
 type Props = {
   defaultEmail?: string
 }
-
 export const SignInForm = ({
   defaultEmail,
 }: Props & HTMLChakraProps<'form'>) => {
   const { t } = useTranslate()
   const router = useRouter()
-  const { status } = useSession()
-  const [authLoading, setAuthLoading] = useState(false)
-  const [isLoadingProviders, setIsLoadingProviders] = useState(true)
+  const [status] = useState('authenticated')
+  const [, setAuthLoading] = useState(false)
+  const [, setIsLoadingProviders] = useState(true)
 
   const [emailValue, setEmailValue] = useState(defaultEmail ?? '')
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false)
 
   const { showToast } = useToast()
-  const [providers, setProviders] =
+  const [, setProviders] =
     useState<
       Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider>
     >()
 
-  const hasNoAuthProvider =
-    !isLoadingProviders && Object.keys(providers ?? {}).length === 0
-
   useEffect(() => {
-    if (status === 'authenticated') {
-      const redirectPath = router.query.redirectPath?.toString()
-      router.replace(redirectPath ? sanitizeUrl(redirectPath) : '/typebots')
-      return
-    }
+    // if (status === 'authenticated') {
+    //   router.replace(router.query.redirectPath?.toString() ?? '/typebots')
+    //   return
+    // }
     ;(async () => {
       const providers = await getProviders()
       setProviders(providers ?? undefined)
@@ -123,51 +115,27 @@ export const SignInForm = ({
     setAuthLoading(false)
   }
 
-  if (isLoadingProviders) return <Spinner />
-  if (hasNoAuthProvider)
-    return (
-      <Text>
-        {t('auth.noProvider.preLink')}{' '}
-        <TextLink
-          href="https://docs.typebot.io/self-hosting/configuration"
-          isExternal
-        >
-          {t('auth.noProvider.link')}
-        </TextLink>
-      </Text>
-    )
   return (
     <Stack spacing="4" w="330px">
-      {!isMagicLinkSent && (
+      <>
         <>
-          <SocialLoginButtons providers={providers} />
-          {providers?.email && (
-            <>
-              <DividerWithText mt="6">{t('auth.orEmailLabel')}</DividerWithText>
-              <HStack as="form" onSubmit={handleEmailSubmit}>
-                <Input
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="email@company.com"
-                  required
-                  value={emailValue}
-                  onChange={handleEmailChange}
-                />
-                <Button
-                  type="submit"
-                  isLoading={
-                    ['loading', 'authenticated'].includes(status) || authLoading
-                  }
-                  isDisabled={isMagicLinkSent}
-                >
-                  {t('auth.emailSubmitButton.label')}
-                </Button>
-              </HStack>
-            </>
-          )}
+          <DividerWithText mt="6">{t('auth.orEmailLabel')}</DividerWithText>
+          <HStack as="form" onSubmit={handleEmailSubmit}>
+            <Input
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="email@company.com"
+              required
+              value={emailValue}
+              onChange={handleEmailChange}
+            />
+            <Button type="submit" isDisabled={isMagicLinkSent}>
+              {t('auth.emailSubmitButton.label')}
+            </Button>
+          </HStack>
         </>
-      )}
+      </>
       {router.query.error && (
         <SignInError error={router.query.error.toString()} />
       )}

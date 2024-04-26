@@ -35,7 +35,6 @@ const inspectUser = async () => {
               isVerified: true,
               stripeId: true,
               isSuspended: true,
-              isPastDue: true,
               members: {
                 select: {
                   role: true,

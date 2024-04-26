@@ -19,7 +19,7 @@ import { RatingForm } from '@/features/blocks/inputs/rating'
 import { FileUploadForm } from '@/features/blocks/inputs/fileUpload'
 import { defaultSettings } from '@typebot.io/schemas/features/typebot/settings/constants'
 import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/constants'
-import { getBlockById } from '@typebot.io/schemas/helpers'
+import { getBlockById } from '@typebot.io/lib/getBlockById'
 
 export const InputChatBlock = ({
   block,

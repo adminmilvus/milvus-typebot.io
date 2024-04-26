@@ -23,9 +23,9 @@ export const OnboardingPage = () => {
   const { replace, query } = useRouter()
   const confettiCanvaContainer = useRef<HTMLCanvasElement | null>(null)
   const confettiCanon = useRef<confetti.CreateTypes>()
-  const { user, updateUser } = useUser()
+  const { user } = useUser()
   const [currentStep, setCurrentStep] = useState<number>(user?.name ? 2 : 1)
-  const [onboardingReplies, setOnboardingReplies] = useState<{
+  const [, setOnboardingReplies] = useState<{
     name?: string
     company?: string
     onboardingCategories?: string[]
@@ -93,12 +93,12 @@ export const OnboardingPage = () => {
   }
 
   const skipOnboarding = () => {
-    updateUser(onboardingReplies)
+    // updateUser(onboardingReplies)
     replace({ pathname: '/typebots', query })
   }
 
   const updateUserAndProceedToTypebotCreation = () => {
-    updateUser(onboardingReplies)
+    // updateUser(onboardingReplies)
     setTimeout(() => {
       replace({
         pathname: '/typebots',

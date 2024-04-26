@@ -5,6 +5,7 @@ import { Typebot } from '@typebot.io/schemas/features/typebot/typebot'
 import { BackgroundType } from '@typebot.io/schemas/features/typebot/theme/constants'
 import { defaultSettings } from '@typebot.io/schemas/features/typebot/settings/constants'
 import { Font } from '@typebot.io/schemas'
+import { useEffect } from 'react'
 
 export type TypebotV3PageProps = {
   url: string
@@ -14,6 +15,7 @@ export type TypebotV3PageProps = {
   isHideQueryParamsEnabled: boolean | null
   background: NonNullable<Typebot['theme']['general']>['background']
   metadata: Typebot['settings']['metadata']
+  chat_id?: string
 }
 
 export const TypebotPageV3 = ({
@@ -24,8 +26,15 @@ export const TypebotPageV3 = ({
   isHideQueryParamsEnabled,
   metadata,
   background,
+  chat_id,
 }: TypebotV3PageProps) => {
   const { asPath, push } = useRouter()
+
+  useEffect(() => {
+    if (chat_id) {
+      localStorage.setItem('milvus-typebot-chat-id', chat_id)
+    }
+  }, [chat_id])
 
   const clearQueryParamsIfNecessary = () => {
     const hasQueryParams = asPath.includes('?')

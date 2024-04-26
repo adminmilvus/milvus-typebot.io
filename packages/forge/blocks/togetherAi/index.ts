@@ -3,7 +3,7 @@ import { TogetherAiLogo } from './logo'
 import { auth } from './auth'
 import { createChatCompletion } from './actions/createChatCompletion'
 
-export const togetherAiBlock = createBlock({
+export const togetherAi = createBlock({
   id: 'together-ai',
   name: 'Together',
   fullName: 'Together AI',

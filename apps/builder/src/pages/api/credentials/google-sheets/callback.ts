@@ -3,14 +3,14 @@ import { Prisma } from '@typebot.io/prisma'
 import prisma from '@typebot.io/lib/prisma'
 import { googleSheetsScopes } from './consent-url'
 import { badRequest, notAuthenticated } from '@typebot.io/lib/api'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
 import { env } from '@typebot.io/env'
 import { encrypt } from '@typebot.io/lib/api/encryption/encrypt'
 import { OAuth2Client } from 'google-auth-library'
 import { parseGroups } from '@typebot.io/schemas'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const user = await getAuthenticatedUser(req, res)
+  const user = getAuthenticatedUser()
   if (!user) return notAuthenticated(res)
   const state = req.query.state as string | undefined
   if (!state) return badRequest(res)

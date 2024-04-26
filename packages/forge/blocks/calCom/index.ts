@@ -3,7 +3,7 @@ import { CalComLogo } from './logo'
 import { bookEvent } from './actions/bookEvent'
 import { baseOptions } from './baseOptions'
 
-export const calComBlock = createBlock({
+export const calCom = createBlock({
   id: 'cal-com',
   name: 'Cal.com',
   tags: ['calendar', 'scheduling', 'meetings'],

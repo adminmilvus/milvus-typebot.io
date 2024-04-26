@@ -5,12 +5,7 @@ import { NumberInput } from '@/components/inputs'
 import { FormLabel, HStack } from '@chakra-ui/react'
 import { ProgressBar } from '@typebot.io/schemas'
 import {
-  defaultProgressBarBackgroundColor,
-  defaultProgressBarColor,
-  defaultProgressBarIsEnabled,
-  defaultProgressBarPlacement,
-  defaultProgressBarPosition,
-  defaultProgressBarThickness,
+  defaultTheme,
   progressBarPlacements,
   progressBarPositions,
 } from '@typebot.io/schemas/features/typebot/theme/constants'
@@ -39,41 +34,33 @@ export const ProgressBarForm = ({
   const updateThickness = (thickness?: number) =>
     onProgressBarChange({ ...progressBar, thickness })
 
-  const updateBackgroundColor = (backgroundColor: string) =>
-    onProgressBarChange({ ...progressBar, backgroundColor })
-
   return (
     <SwitchWithRelatedSettings
       label={'Enable progress bar?'}
-      initialValue={progressBar?.isEnabled ?? defaultProgressBarIsEnabled}
+      initialValue={
+        progressBar?.isEnabled ?? defaultTheme.general.progressBar.isEnabled
+      }
       onCheckChange={updateEnabled}
     >
       <DropdownList
         size="sm"
         direction="row"
         label="Placement:"
-        currentItem={progressBar?.placement ?? defaultProgressBarPlacement}
+        currentItem={
+          progressBar?.placement ?? defaultTheme.general.progressBar.placement
+        }
         onItemSelect={updatePlacement}
         items={progressBarPlacements}
       />
 
       <HStack justifyContent="space-between">
         <FormLabel mb="0" mr="0">
-          Background color:
-        </FormLabel>
-        <ColorPicker
-          defaultValue={
-            progressBar?.backgroundColor ?? defaultProgressBarBackgroundColor
-          }
-          onColorChange={updateBackgroundColor}
-        />
-      </HStack>
-      <HStack justifyContent="space-between">
-        <FormLabel mb="0" mr="0">
           Color:
         </FormLabel>
         <ColorPicker
-          defaultValue={progressBar?.color ?? defaultProgressBarColor}
+          defaultValue={
+            progressBar?.color ?? defaultTheme.general.progressBar.color
+          }
           onColorChange={updateColor}
         />
       </HStack>
@@ -82,7 +69,9 @@ export const ProgressBarForm = ({
         direction="row"
         withVariableButton={false}
         maxW="100px"
-        defaultValue={progressBar?.thickness ?? defaultProgressBarThickness}
+        defaultValue={
+          progressBar?.thickness ?? defaultTheme.general.progressBar.thickness
+        }
         onValueChange={updateThickness}
         size="sm"
       />
@@ -91,7 +80,9 @@ export const ProgressBarForm = ({
         direction="row"
         label="Position when embedded:"
         moreInfoTooltip='Select "fixed" to always position the progress bar at the top of the window even though your bot is embedded. Select "absolute" to position the progress bar at the top of the chat container.'
-        currentItem={progressBar?.position ?? defaultProgressBarPosition}
+        currentItem={
+          progressBar?.position ?? defaultTheme.general.progressBar.position
+        }
         onItemSelect={updatePosition}
         items={progressBarPositions}
       />

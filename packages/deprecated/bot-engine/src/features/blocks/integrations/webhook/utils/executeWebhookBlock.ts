@@ -9,9 +9,15 @@ import {
 } from '@typebot.io/schemas'
 import { stringify } from 'qs'
 import { sendRequest, byId } from '@typebot.io/lib'
+import { MilvusBlock } from '@typebot.io/schemas/features/blocks/milvus'
 
 export const executeWebhook = async (
-  block: HttpRequestBlock | ZapierBlock | MakeComBlock | PabblyConnectBlock,
+  block:
+    | HttpRequestBlock
+    | ZapierBlock
+    | MakeComBlock
+    | PabblyConnectBlock
+    | MilvusBlock,
   {
     blockId,
     variables,

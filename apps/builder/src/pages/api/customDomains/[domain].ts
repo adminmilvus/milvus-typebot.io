@@ -5,12 +5,12 @@ import {
   methodNotAllowed,
   notAuthenticated,
 } from '@typebot.io/lib/api'
-import ky from 'ky'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
+import { got } from 'got'
 import { env } from '@typebot.io/env'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const user = await getAuthenticatedUser(req, res)
+  const user = getAuthenticatedUser()
   if (!user) return notAuthenticated(res)
   const workspaceId = req.query.workspaceId as string | undefined
   if (!workspaceId) return badRequest(res)
@@ -31,11 +31,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 const deleteDomainOnVercel = (name: string) =>
-  ky.delete(
-    `https://api.vercel.com/v8/projects/${env.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME}/domains/${name}?teamId=${env.VERCEL_TEAM_ID}`,
-    {
-      headers: { Authorization: `Bearer ${env.VERCEL_TOKEN}` },
-    }
-  )
+  got.delete({
+    url: `https://api.vercel.com/v8/projects/${env.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME}/domains/${name}?teamId=${env.VERCEL_TEAM_ID}`,
+    headers: { Authorization: `Bearer ${env.VERCEL_TOKEN}` },
+  })
 
 export default handler

@@ -13,6 +13,8 @@ export const continueChatQuery = async ({
   sessionId: string
 }) => {
   try {
+    const chat_id = localStorage.getItem('milvus-typebot-chat-id') ?? undefined
+
     const data = await ky
       .post(
         `${
@@ -21,6 +23,7 @@ export const continueChatQuery = async ({
         {
           json: {
             message,
+            chat_id,
           },
           timeout: false,
         }

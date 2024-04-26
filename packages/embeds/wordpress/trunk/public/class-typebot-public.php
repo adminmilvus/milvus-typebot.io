@@ -40,8 +40,7 @@ class Typebot_Public
 
   function typebot_script()
   {
-    $lib_version = get_option('lib_version') !== null && get_option('lib_version') !== ''  ? get_option('lib_version') : '0.2';
-    echo '<script type="module">import Typebot from "https://cdn.jsdelivr.net/npm/@typebot.io/js@'.$lib_version.'/dist/web.js";';
+    echo '<script type="module">import Typebot from "https://cdn.jsdelivr.net/npm/@typebot.io/js@0.2.15/dist/web.js";';
     if (
       get_option('excluded_pages') !== null &&
       get_option('excluded_pages') !== ''

@@ -1,4 +1,6 @@
-import { useContext } from 'react'
-import { userContext } from '../UserProvider'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
-export const useUser = () => useContext(userContext)
+export const useUser = () => {
+  const user = getAuthenticatedUser()
+  return { user }
+}

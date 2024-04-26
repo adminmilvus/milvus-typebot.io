@@ -1,21 +1,19 @@
 import React from 'react'
-import { HStack, Flex, Button, useDisclosure } from '@chakra-ui/react'
-import { HardDriveIcon, SettingsIcon } from '@/components/icons'
+import { HStack, Flex, useDisclosure } from '@chakra-ui/react'
+import { HardDriveIcon } from '@/components/icons'
 import { useUser } from '@/features/account/hooks/useUser'
-import { isNotDefined } from '@typebot.io/lib'
+import {} from '@typebot.io/lib'
 import Link from 'next/link'
 import { EmojiOrImageIcon } from '@/components/EmojiOrImageIcon'
-import { useTranslate } from '@tolgee/react'
 import { useWorkspace } from '@/features/workspace/WorkspaceProvider'
 import { WorkspaceDropdown } from '@/features/workspace/components/WorkspaceDropdown'
 import { WorkspaceSettingsModal } from '@/features/workspace/components/WorkspaceSettingsModal'
 
 export const DashboardHeader = () => {
-  const { t } = useTranslate()
-  const { user, logOut } = useUser()
+  const { user } = useUser()
   const { workspace, switchWorkspace, createWorkspace } = useWorkspace()
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onClose } = useDisclosure()
 
   const handleCreateNewWorkspace = () =>
     createWorkspace(user?.name ?? undefined)
@@ -45,7 +43,7 @@ export const DashboardHeader = () => {
               workspace={workspace}
             />
           )}
-          {!workspace?.isPastDue && (
+          {/* {!workspace?.isPastDue && (
             <Button
               leftIcon={<SettingsIcon />}
               onClick={onOpen}
@@ -53,10 +51,10 @@ export const DashboardHeader = () => {
             >
               {t('dashboard.header.settingsButton.label')}
             </Button>
-          )}
+          )} */}
           <WorkspaceDropdown
             currentWorkspace={workspace}
-            onLogoutClick={logOut}
+            onLogoutClick={() => {}}
             onCreateNewWorkspaceClick={handleCreateNewWorkspace}
             onWorkspaceSelected={switchWorkspace}
           />

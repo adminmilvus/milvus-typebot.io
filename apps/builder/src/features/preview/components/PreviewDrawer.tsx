@@ -73,6 +73,7 @@ export const PreviewDrawer = () => {
       right="0"
       top={`0`}
       h={`100%`}
+      w={`${width}px`}
       bgColor={useColorModeValue('white', 'gray.900')}
       borderLeftWidth={'1px'}
       shadow="lg"
@@ -81,7 +82,6 @@ export const PreviewDrawer = () => {
       onMouseLeave={() => setIsResizeHandleVisible(false)}
       p="6"
       zIndex={10}
-      style={{ width: `${width}px` }}
     >
       <Fade in={isResizeHandleVisible}>
         <ResizeHandle

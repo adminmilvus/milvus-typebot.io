@@ -1,10 +1,9 @@
 import { option, createAction } from '@typebot.io/forge'
 import { isDefined } from '@typebot.io/lib'
 import { auth } from '../auth'
+import MistralClient from '@mistralai/mistralai'
 import { parseMessages } from '../helpers/parseMessages'
 import { OpenAIStream } from 'ai'
-// @ts-ignore
-import MistralClient from '../helpers/client'
 
 const nativeMessageContentSchema = {
   content: option.string.layout({
@@ -70,25 +69,12 @@ export const createChatCompletion = createAction({
   options,
   turnableInto: [
     {
-      blockId: 'openai',
+      blockType: 'openai',
     },
     {
-      blockId: 'together-ai',
+      blockType: 'together-ai',
     },
-    { blockId: 'open-router' },
-    {
-      blockId: 'anthropic',
-      transform: (options) => ({
-        ...options,
-        model: undefined,
-        action: 'Create Chat Message',
-        responseMapping: options.responseMapping?.map((res: any) =>
-          res.item === 'Message content'
-            ? { ...res, item: 'Message Content' }
-            : res
-        ),
-      }),
-    },
+    { blockType: 'open-router' },
   ],
   getSetVariableIds: (options) =>
     options.responseMapping?.map((res) => res.variableId).filter(isDefined) ??
@@ -100,15 +86,12 @@ export const createChatCompletion = createAction({
       fetch: async ({ credentials }) => {
         const client = new MistralClient(credentials.apiKey)
 
-        const listModelsResponse: any = await client.listModels()
+        const listModelsResponse = await client.listModels()
 
         return (
           listModelsResponse.data
-            .sort(
-              (a: { created: number }, b: { created: number }) =>
-                b.created - a.created
-            )
-            .map((model: { id: any }) => model.id) ?? []
+            .sort((a, b) => b.created - a.created)
+            .map((model) => model.id) ?? []
         )
       },
     },
@@ -118,7 +101,7 @@ export const createChatCompletion = createAction({
       if (!options.model) return logs.add('No model selected')
       const client = new MistralClient(apiKey)
 
-      const response: any = await client.chat({
+      const response = await client.chat({
         model: options.model,
         messages: parseMessages({ options, variables }),
       })
@@ -138,11 +121,12 @@ export const createChatCompletion = createAction({
         if (!options.model) return
         const client = new MistralClient(apiKey)
 
-        const response: any = client.chatStream({
+        const response = client.chatStream({
           model: options.model,
           messages: parseMessages({ options, variables }),
         })
 
+        // @ts-ignore https://github.com/vercel/ai/issues/936
         return OpenAIStream(response)
       },
     },

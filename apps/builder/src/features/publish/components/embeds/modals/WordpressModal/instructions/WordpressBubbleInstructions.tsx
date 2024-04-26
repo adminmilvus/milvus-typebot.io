@@ -8,17 +8,12 @@ import {
   Link,
   Stack,
   Text,
-  Code,
 } from '@chakra-ui/react'
 import { BubbleProps } from '@typebot.io/nextjs'
 import { useState } from 'react'
 import { BubbleSettings } from '../../../settings/BubbleSettings/BubbleSettings'
 import { parseApiHostValue, parseInitBubbleCode } from '../../../snippetParsers'
 import { parseDefaultBubbleTheme } from '../../Javascript/instructions/JavascriptBubbleInstructions'
-import packageJson from '../../../../../../../../../../packages/embeds/js/package.json'
-import { isCloudProdInstance } from '@/helpers/isCloudProdInstance'
-
-const typebotCloudLibraryVersion = '0.2'
 
 type Props = {
   publicId: string
@@ -56,14 +51,6 @@ export const WordpressBubbleInstructions = ({ publicId }: Props) => {
           the official Typebot WordPress plugin
           <ExternalLinkIcon mx="2px" />
         </Link>
-      </ListItem>
-      <ListItem>
-        Set <Code>Library version</Code> to{' '}
-        <Code>
-          {isCloudProdInstance()
-            ? typebotCloudLibraryVersion
-            : packageJson.version}
-        </Code>
       </ListItem>
       <ListItem>
         <Stack spacing={4}>

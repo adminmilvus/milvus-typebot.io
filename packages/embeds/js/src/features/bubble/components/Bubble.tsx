@@ -14,11 +14,6 @@ import { isDefined } from '@typebot.io/lib'
 import { BubbleParams } from '../types'
 import { Bot, BotProps } from '../../../components/Bot'
 import { getPaymentInProgressInStorage } from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage'
-import {
-  getBotOpenedStateFromStorage,
-  removeBotOpenedStateInStorage,
-  setBotOpenedStateInStorage,
-} from '@/utils/storage'
 
 export type BubbleProps = BotProps &
   BubbleParams & {
@@ -38,6 +33,7 @@ export const Bubble = (props: BubbleProps) => {
   ])
   const [isMounted, setIsMounted] = createSignal(true)
   const [prefilledVariables, setPrefilledVariables] = createSignal(
+    // eslint-disable-next-line solid/reactivity
     botProps.prefilledVariables
   )
   const [isPreviewMessageDisplayed, setIsPreviewMessageDisplayed] =
@@ -52,21 +48,20 @@ export const Bubble = (props: BubbleProps) => {
   const [isBotOpened, setIsBotOpened] = createSignal(false)
   const [isBotStarted, setIsBotStarted] = createSignal(false)
   const [buttonSize, setButtonSize] = createSignal(
+    // eslint-disable-next-line solid/reactivity
     parseButtonSize(bubbleProps.theme?.button?.size ?? 'medium')
   )
   createEffect(() => {
     setButtonSize(parseButtonSize(bubbleProps.theme?.button?.size ?? 'medium'))
   })
 
-  let progressBarContainerRef
-
   onMount(() => {
     window.addEventListener('message', processIncomingEvent)
     const autoShowDelay = bubbleProps.autoShowDelay
     const previewMessageAutoShowDelay =
       bubbleProps.previewMessage?.autoShowDelay
-    if (getBotOpenedStateFromStorage() || getPaymentInProgressInStorage())
-      openBot()
+    const paymentInProgress = getPaymentInProgressInStorage()
+    if (paymentInProgress) openBot()
     if (isDefined(autoShowDelay)) {
       setTimeout(() => {
         openBot()
@@ -116,7 +111,6 @@ export const Bubble = (props: BubbleProps) => {
 
   const closeBot = () => {
     setIsBotOpened(false)
-    removeBotOpenedStateInStorage()
     if (isBotOpened()) bubbleProps.onClose?.()
   }
 
@@ -150,11 +144,6 @@ export const Bubble = (props: BubbleProps) => {
     } else setIsMounted(false)
   }
 
-  const handleOnChatStatePersisted = (isPersisted: boolean) => {
-    botProps.onChatStatePersisted?.(isPersisted)
-    if (isPersisted) setBotOpenedStateInStorage()
-  }
-
   return (
     <Show when={isMounted()}>
       <style>{styles}</style>
@@ -175,11 +164,13 @@ export const Bubble = (props: BubbleProps) => {
         isBotOpened={isBotOpened()}
         buttonSize={buttonSize()}
       />
-      <div ref={progressBarContainerRef} />
       <div
         part="bot"
         style={{
-          height: `calc(100% - ${buttonSize()} - 32px)`,
+          height:
+            props.theme?.button?.size === 'large'
+              ? 'calc(100% - 95px)'
+              : 'calc(100% - 80px)',
           'max-height': props.theme?.chatWindow?.maxHeight ?? '704px',
           'max-width': props.theme?.chatWindow?.maxWidth ?? '400px',
           transition:
@@ -195,18 +186,14 @@ export const Bubble = (props: BubbleProps) => {
         class={
           'fixed rounded-lg w-full' +
           (isBotOpened() ? ' opacity-1' : ' opacity-0 pointer-events-none') +
-          (props.theme?.placement === 'left'
-            ? ' left-5'
-            : ' sm:right-5 right-0')
+          (props.theme?.placement === 'left' ? ' left-5' : ' right-5')
         }
       >
         <Show when={isBotStarted()}>
           <Bot
             {...botProps}
-            onChatStatePersisted={handleOnChatStatePersisted}
             prefilledVariables={prefilledVariables()}
             class="rounded-lg"
-            progressBarRef={progressBarContainerRef}
           />
         </Show>
       </div>

@@ -45,6 +45,7 @@ import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integr
 import { LogicBlockType } from '@typebot.io/schemas/features/blocks/logic/constants'
 import { ForgedBlockSettings } from '../../../../forge/components/ForgedBlockSettings'
 import { OpenAISettings } from '@/features/blocks/integrations/openai/components/OpenAISettings'
+import { MilvusBlockType } from '@typebot.io/schemas/features/blocks/milvus/constants'
 
 type Props = {
   block: BlockWithOptions
@@ -115,6 +116,69 @@ export const BlockSettings = ({
   }
 
   switch (block.type) {
+    case MilvusBlockType.CREATE_TICKET: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.CREATE_TICKET}
+        />
+      )
+    }
+    case MilvusBlockType.BASE_BY_TAG: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.BASE_BY_TAG}
+        />
+      )
+    }
+    case MilvusBlockType.ARTICLE_BY_ID: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.ARTICLE_BY_ID}
+        />
+      )
+    }
+    case MilvusBlockType.CLIENT_BY_DOCUMENTO: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.CLIENT_BY_DOCUMENTO}
+        />
+      )
+    }
+    case MilvusBlockType.CLIENT_BY_EMAIL: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.CLIENT_BY_EMAIL}
+        />
+      )
+    }
+    case MilvusBlockType.SPEAK_WITH_ATTENDANT: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.SPEAK_WITH_ATTENDANT}
+        />
+      )
+    }
+    case MilvusBlockType.CLOSE_CHAT: {
+      return (
+        <HttpRequestSettings
+          block={block}
+          onOptionsChange={updateOptions}
+          milvusType={MilvusBlockType.CLOSE_CHAT}
+        />
+      )
+    }
     case InputBlockType.TEXT: {
       return (
         <TextInputSettings

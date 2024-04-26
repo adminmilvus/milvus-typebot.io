@@ -6,13 +6,13 @@ import {
   methodNotAllowed,
   notAuthenticated,
 } from '@typebot.io/lib/api'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
 import { sendWorkspaceMemberInvitationEmail } from '@typebot.io/emails'
-import { getSeatsLimit } from '@typebot.io/billing/getSeatsLimit'
+import { getSeatsLimit } from '@typebot.io/lib/billing/getSeatsLimit'
 import { env } from '@typebot.io/env'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const user = await getAuthenticatedUser(req, res)
+  const user = getAuthenticatedUser()
   if (!user) return notAuthenticated(res)
   if (req.method === 'POST') {
     const data = req.body as Omit<WorkspaceInvitation, 'id' | 'createdAt'>

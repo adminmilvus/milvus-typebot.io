@@ -17,8 +17,6 @@ import { isDefined } from '@typebot.io/lib'
 import { EventsCoordinatesProvider } from '@/features/graph/providers/EventsCoordinateProvider'
 import { timeFilterValues } from '../constants'
 
-const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
 type Props = {
   timeFilter: (typeof timeFilterValues)[number]
   onTimeFilterChange: (timeFilter: (typeof timeFilterValues)[number]) => void
@@ -37,7 +35,6 @@ export const AnalyticsGraphContainer = ({
     {
       typebotId: typebot?.id as string,
       timeFilter,
-      timeZone,
     },
     { enabled: isDefined(publishedTypebot) }
   )
@@ -46,7 +43,6 @@ export const AnalyticsGraphContainer = ({
     {
       typebotId: typebot?.id as string,
       timeFilter,
-      timeZone,
     },
     { enabled: isDefined(publishedTypebot) }
   )

@@ -35,6 +35,8 @@ export async function startChatQuery({
   if (isNotDefined(typebot))
     throw new Error('Typebot ID is required to get initial messages')
 
+  const chat_id = localStorage.getItem('milvus-typebot-chat-id') ?? undefined
+
   const paymentInProgressStateStr = getPaymentInProgressInStorage() ?? undefined
   const paymentInProgressState = paymentInProgressStateStr
     ? (JSON.parse(paymentInProgressStateStr) as {
@@ -83,10 +85,7 @@ export async function startChatQuery({
               startFrom,
               typebot,
               prefilledVariables,
-            } satisfies Omit<
-              StartPreviewChatInput,
-              'typebotId' | 'isOnlyRegistering'
-            >,
+            } satisfies Omit<StartPreviewChatInput, 'typebotId'>,
             timeout: false,
           }
         )
@@ -110,6 +109,7 @@ export async function startChatQuery({
             prefilledVariables,
             resultId,
             isOnlyRegistering: false,
+            chat_id,
           } satisfies Omit<StartChatInput, 'publicId'>,
           timeout: false,
         }

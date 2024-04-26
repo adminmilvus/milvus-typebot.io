@@ -1,7 +1,6 @@
 import { createId } from '@paralleldrive/cuid2'
 import { TRPCError } from '@trpc/server'
-import { isDefined, omit, isNotEmpty } from '@typebot.io/lib'
-import { isInputBlock } from '@typebot.io/schemas/helpers'
+import { isDefined, omit, isNotEmpty, isInputBlock } from '@typebot.io/lib'
 import {
   Variable,
   VariableWithValue,
@@ -34,14 +33,11 @@ import { continueBotFlow } from './continueBotFlow'
 import { parseVariables } from '@typebot.io/variables/parseVariables'
 import { defaultSettings } from '@typebot.io/schemas/features/typebot/settings/constants'
 import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integrations/constants'
+import { defaultTheme } from '@typebot.io/schemas/features/typebot/theme/constants'
 import { VisitedEdge } from '@typebot.io/prisma'
 import { env } from '@typebot.io/env'
 import { getFirstEdgeId } from './getFirstEdgeId'
 import { Reply } from './types'
-import {
-  defaultGuestAvatarIsEnabled,
-  defaultHostAvatarIsEnabled,
-} from '@typebot.io/schemas/features/typebot/theme/constants'
 
 type StartParams =
   | ({
@@ -57,6 +53,7 @@ type Props = {
   message: Reply
   startParams: StartParams
   initialSessionState?: Pick<SessionState, 'whatsApp' | 'expiryTimeout'>
+  chat_id?: string
 }
 
 export const startSession = async ({
@@ -64,6 +61,7 @@ export const startSession = async ({
   message,
   startParams,
   initialSessionState,
+  chat_id,
 }: Props): Promise<
   Omit<StartChatResponse, 'resultId' | 'isStreamEnabled' | 'sessionId'> & {
     newSessionState: SessionState
@@ -154,8 +152,7 @@ export const startSession = async ({
       typebot: {
         id: typebot.id,
         settings: deepParseVariables(
-          initialState.typebotsQueue[0].typebot.variables,
-          { removeEmptyStrings: true }
+          initialState.typebotsQueue[0].typebot.variables
         )(typebot.settings),
         theme: sanitizeAndParseTheme(typebot.theme, {
           variables: initialState.typebotsQueue[0].typebot.variables,
@@ -173,6 +170,7 @@ export const startSession = async ({
     startFrom:
       startParams.type === 'preview' ? startParams.startFrom : undefined,
     startTime: Date.now(),
+    chat_id,
   })
 
   // If params has message and first block is an input block, we can directly continue the bot flow
@@ -202,6 +200,7 @@ export const startSession = async ({
         state: {
           ...newSessionState,
           currentBlockId: firstBlock.id,
+          chat_id,
         },
       })
     }
@@ -258,8 +257,7 @@ export const startSession = async ({
       typebot: {
         id: typebot.id,
         settings: deepParseVariables(
-          newSessionState.typebotsQueue[0].typebot.variables,
-          { removeEmptyStrings: true }
+          newSessionState.typebotsQueue[0].typebot.variables
         )(typebot.settings),
         theme: sanitizeAndParseTheme(typebot.theme, {
           variables: initialState.typebotsQueue[0].typebot.variables,
@@ -276,8 +274,7 @@ export const startSession = async ({
     typebot: {
       id: typebot.id,
       settings: deepParseVariables(
-        newSessionState.typebotsQueue[0].typebot.variables,
-        { removeEmptyStrings: true }
+        newSessionState.typebotsQueue[0].typebot.variables
       )(typebot.settings),
       theme: sanitizeAndParseTheme(typebot.theme, {
         variables: initialState.typebotsQueue[0].typebot.variables,
@@ -391,11 +388,12 @@ const getResult = async ({
 
 const parseDynamicThemeInState = (theme: Theme) => {
   const hostAvatarUrl =
-    theme.chat?.hostAvatar?.isEnabled ?? defaultHostAvatarIsEnabled
+    theme.chat?.hostAvatar?.isEnabled ?? defaultTheme.chat.hostAvatar.isEnabled
       ? theme.chat?.hostAvatar?.url
       : undefined
   const guestAvatarUrl =
-    theme.chat?.guestAvatar?.isEnabled ?? defaultGuestAvatarIsEnabled
+    theme.chat?.guestAvatar?.isEnabled ??
+    defaultTheme.chat.guestAvatar.isEnabled
       ? theme.chat?.guestAvatar?.url
       : undefined
   if (!hostAvatarUrl?.startsWith('{{') && !guestAvatarUrl?.startsWith('{{'))
@@ -454,11 +452,9 @@ const sanitizeAndParseTheme = (
   { variables }: { variables: Variable[] }
 ): Theme => ({
   general: theme.general
-    ? deepParseVariables(variables, { removeEmptyStrings: true })(theme.general)
+    ? deepParseVariables(variables)(theme.general)
     : undefined,
-  chat: theme.chat
-    ? deepParseVariables(variables, { removeEmptyStrings: true })(theme.chat)
-    : undefined,
+  chat: theme.chat ? deepParseVariables(variables)(theme.chat) : undefined,
   customCss: theme.customCss
     ? removeLiteBadgeCss(parseVariables(variables)(theme.customCss))
     : undefined,

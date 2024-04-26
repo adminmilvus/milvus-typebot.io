@@ -40,10 +40,20 @@ import { LogicBlockType } from '@typebot.io/schemas/features/blocks/logic/consta
 import { Block } from '@typebot.io/schemas'
 import { OpenAILogo } from '@/features/blocks/integrations/openai/components/OpenAILogo'
 import { ForgedBlockIcon } from '@/features/forge/ForgedBlockIcon'
+import { MilvusBlockType } from '@typebot.io/schemas/features/blocks/milvus/constants'
+import { IconMilvus } from 'config-milvus/IconMilvus'
 
-type BlockIconProps = { type: Block['type']; mt?: string }
+type BlockIconProps = {
+  type: Block['type'] | MilvusBlockType
+  mt?: string
+  isGrid?: boolean
+}
 
-export const BlockIcon = ({ type, mt }: BlockIconProps): JSX.Element => {
+export const BlockIcon = ({
+  type,
+  mt,
+  isGrid,
+}: BlockIconProps): JSX.Element => {
   const blue = useColorModeValue('blue.500', 'blue.300')
   const orange = useColorModeValue('orange.500', 'orange.300')
   const purple = useColorModeValue('purple.500', 'purple.300')
@@ -118,6 +128,50 @@ export const BlockIcon = ({ type, mt }: BlockIconProps): JSX.Element => {
       return <PixelLogo mt={mt} />
     case IntegrationBlockType.ZEMANTIC_AI:
       return <ZemanticAiLogo mt={mt} />
+    case MilvusBlockType.CREATE_TICKET:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+    case MilvusBlockType.BASE_BY_TAG:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+    case MilvusBlockType.ARTICLE_BY_ID:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+
+    case MilvusBlockType.CLIENT_BY_DOCUMENTO:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+    case MilvusBlockType.CLIENT_BY_EMAIL:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+    case MilvusBlockType.SPEAK_WITH_ATTENDANT:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+    case MilvusBlockType.CLOSE_CHAT:
+      if (isGrid) {
+        return <IconMilvus width={18} height={18} />
+      } else {
+        return <IconMilvus width={18} height={18} />
+      }
+
     case 'start':
       return <FlagIcon mt={mt} />
     case IntegrationBlockType.OPEN_AI:

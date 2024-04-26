@@ -9,8 +9,7 @@ import {
 import { SetTypebot } from '../TypebotProvider'
 import { Draft, produce } from 'immer'
 import { deleteConnectedEdgesDraft } from './edges'
-import { byId } from '@typebot.io/lib'
-import { blockHasItems } from '@typebot.io/schemas/helpers'
+import { byId, blockHasItems } from '@typebot.io/lib'
 import { createId } from '@paralleldrive/cuid2'
 import {
   BlockWithCreatableItems,

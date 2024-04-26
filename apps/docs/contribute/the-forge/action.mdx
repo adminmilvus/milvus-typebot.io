@@ -9,7 +9,7 @@ Here is the `sendMessage` action of the Telegram block:
 ```ts
 import { createAction, option } from '@typebot.io/forge'
 import { auth } from '../auth'
-import ky from 'ky'
+import { got } from 'got'
 
 export const sendMessage = createAction({
   auth,
@@ -27,14 +27,14 @@ export const sendMessage = createAction({
   run: {
     server: async ({ credentials: { token }, options: { chatId, text } }) => {
       try {
-        await ky.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+        await got.post(`https://api.telegram.org/bot${token}/sendMessage`, {
           json: {
             chat_id: chatId,
             text,
           },
         })
       } catch (error) {
-        console.log('ERROR', await error.response.text())
+        console.log('ERROR', error.response.body)
       }
     },
   },

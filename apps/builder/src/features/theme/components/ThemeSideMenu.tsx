@@ -35,7 +35,7 @@ export const ThemeSideMenu = () => {
     typebot &&
     updateTypebot({ updates: { theme: { ...typebot.theme, customCss } } })
 
-  const selectTemplate = (
+  const selectedTemplate = (
     selectedTemplate: Partial<Pick<ThemeTemplate, 'id' | 'theme'>>
   ) => {
     if (!typebot) return
@@ -55,8 +55,6 @@ export const ThemeSideMenu = () => {
         settings: { ...typebot.settings, general: { isBrandingEnabled } },
       },
     })
-
-  const templateId = typebot?.selectedThemeTemplateId ?? undefined
 
   return (
     <Stack
@@ -86,10 +84,12 @@ export const ThemeSideMenu = () => {
             <AccordionPanel pb={12}>
               {typebot && (
                 <ThemeTemplates
-                  selectedTemplateId={templateId}
+                  selectedTemplateId={
+                    typebot.selectedThemeTemplateId ?? undefined
+                  }
                   currentTheme={typebot.theme}
                   workspaceId={typebot.workspaceId}
-                  onTemplateSelect={selectTemplate}
+                  onTemplateSelect={selectedTemplate}
                 />
               )}
             </AccordionPanel>
@@ -106,7 +106,6 @@ export const ThemeSideMenu = () => {
           <AccordionPanel pb={4}>
             {typebot && (
               <GeneralSettings
-                key={templateId}
                 isBrandingEnabled={
                   typebot.settings.general?.isBrandingEnabled ??
                   defaultSettings.general.isBrandingEnabled
@@ -129,11 +128,9 @@ export const ThemeSideMenu = () => {
           <AccordionPanel pb={4}>
             {typebot && (
               <ChatThemeSettings
-                key={templateId}
                 workspaceId={typebot.workspaceId}
                 typebotId={typebot.id}
                 chatTheme={typebot.theme.chat}
-                generalBackground={typebot.theme.general?.background}
                 onChatThemeChange={updateChatTheme}
               />
             )}
@@ -150,7 +147,6 @@ export const ThemeSideMenu = () => {
           <AccordionPanel pb={4}>
             {typebot && (
               <CustomCssSettings
-                key={templateId}
                 customCss={typebot.theme.customCss}
                 onCustomCssChange={updateCustomCss}
               />

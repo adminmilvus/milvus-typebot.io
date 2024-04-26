@@ -6,7 +6,8 @@ import { bubbleBlockSchemas } from './bubbles/schema'
 import { LogicBlock, logicBlockSchemas } from './logic/schema'
 import { InputBlock, inputBlockSchemas } from './inputs/schema'
 import { IntegrationBlock, integrationBlockSchemas } from './integrations'
-import { forgedBlockSchemas } from '@typebot.io/forge-repository/schemas'
+import { MilvusBlock, milvusBlockSchemas } from './milvus'
+import { enabledBlocks } from '@typebot.io/forge-repository'
 
 export type BlockWithOptions = Extract<Block, { options?: any }>
 
@@ -25,6 +26,7 @@ export const blockSchemaV5 = z.discriminatedUnion('type', [
   ...inputBlockSchemas.v5,
   ...logicBlockSchemas.v5,
   ...integrationBlockSchemas.v5,
+  ...milvusBlockSchemas.v5,
 ])
 export type BlockV5 = z.infer<typeof blockSchemaV5>
 
@@ -34,8 +36,16 @@ export const blockSchemaV6 = z
     ...inputBlockSchemas.v6,
     ...logicBlockSchemas.v6,
     ...integrationBlockSchemas.v6,
-    ...Object.values(forgedBlockSchemas),
+    ...milvusBlockSchemas.v6,
   ])
+  .or(
+    blockBaseSchema.merge(
+      z.object({
+        type: z.enum(enabledBlocks),
+        options: z.any().optional(),
+      })
+    )
+  )
   .openapi({
     title: 'Block',
     ref: 'block',
@@ -49,5 +59,6 @@ export type BlockOptions =
   | InputBlock['options']
   | LogicBlock['options']
   | IntegrationBlock['options']
+  | MilvusBlock['options']
 
 export type BlockWithItems = Extract<BlockV6, { items: ItemV6[] }>

@@ -1,5 +1,6 @@
 import { Variable, HttpResponse } from '@typebot.io/schemas'
 import { sendRequest } from '@typebot.io/lib'
+import { env } from '@typebot.io/env'
 
 export const executeWebhook = (
   typebotId: string,
@@ -7,7 +8,7 @@ export const executeWebhook = (
   { blockId }: { blockId: string }
 ) =>
   sendRequest<HttpResponse>({
-    url: `/api/typebots/${typebotId}/blocks/${blockId}/testWebhook`,
+    url: `${env.NEXT_PUBLIC_VIEWER_URL[0]}/api/typebots/${typebotId}/blocks/${blockId}/executeWebhook`,
     method: 'POST',
     body: {
       variables,

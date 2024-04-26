@@ -1,45 +1,20 @@
-import { defineConfig, devices } from '@playwright/test'
+import { PlaywrightTestConfig } from '@playwright/test'
+import path from 'path'
+import { playwrightBaseConfig } from '@typebot.io/lib/playwright/baseConfig'
 
-export default defineConfig({
-  timeout: process.env.CI ? 50 * 1000 : 40 * 1000,
-  expect: {
-    timeout: process.env.CI ? 10 * 1000 : 5 * 1000,
-  },
-  forbidOnly: !!process.env.CI,
-  workers: process.env.CI ? 1 : 3,
-  retries: process.env.CI ? 2 : 0,
-  reporter: [
-    [process.env.CI ? 'github' : 'list'],
-    ['html', { outputFolder: 'src/test/reporters' }],
-  ],
-  maxFailures: process.env.CI ? 10 : undefined,
+const config: PlaywrightTestConfig = {
+  ...playwrightBaseConfig,
   webServer: process.env.CI
     ? {
-        command: 'pnpm run start',
-        timeout: 60_000,
-        reuseExistingServer: true,
+        ...(playwrightBaseConfig.webServer as { command: string }),
         port: 3000,
       }
     : undefined,
-  outputDir: './src/test/results',
   use: {
-    trace: 'on-first-retry',
-    locale: 'en-US',
+    ...playwrightBaseConfig.use,
     baseURL: process.env.NEXTAUTH_URL,
-    storageState: './src/test/storageState.json',
+    storageState: path.join(__dirname, 'src/test/storageState.json'),
   },
-  projects: [
-    {
-      name: 'setup db',
-      testMatch: /global\.setup\.ts/,
-    },
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1400, height: 1000 },
-      },
-      dependencies: ['setup db'],
-    },
-  ],
-})
+}
+
+export default config

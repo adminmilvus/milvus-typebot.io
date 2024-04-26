@@ -3,7 +3,7 @@ import { PictureChoiceBlock } from '@typebot.io/schemas/features/blocks/inputs/p
 import { For, Show, createEffect, createSignal, onMount } from 'solid-js'
 import { Checkbox } from '../buttons/components/Checkbox'
 import { SendButton } from '@/components'
-import { isDefined, isEmpty, isNotEmpty, isSvgSrc } from '@typebot.io/lib'
+import { isDefined, isEmpty, isSvgSrc } from '@typebot.io/lib'
 import { SearchInput } from '@/components/inputs/SearchInput'
 import { isMobile } from '@/utils/isMobileSignal'
 import { defaultPictureChoiceOptions } from '@typebot.io/schemas/features/blocks/inputs/pictureChoice/constants'
@@ -22,7 +22,7 @@ export const MultiplePictureChoice = (props: Props) => {
   const [totalLoadedImages, setTotalLoadedImages] = createSignal(0)
 
   onMount(() => {
-    if (!isMobile() && inputRef) inputRef.focus({ preventScroll: true })
+    if (!isMobile() && inputRef) inputRef.focus()
   })
 
   const handleClick = (itemId: string) => {
@@ -47,7 +47,7 @@ export const MultiplePictureChoice = (props: Props) => {
           const item = props.defaultItems.find(
             (item) => item.id === selectedItemId
           )
-          return isNotEmpty(item?.title) ? item.title : item?.pictureSrc
+          return item?.title ?? item?.pictureSrc
         })
         .join(', '),
     })

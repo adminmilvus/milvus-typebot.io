@@ -7,8 +7,9 @@ import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integr
 import { LogicBlockType } from '@typebot.io/schemas/features/blocks/logic/constants'
 import { Block } from '@typebot.io/schemas'
 import { ForgedBlockLabel } from '@/features/forge/ForgedBlockLabel'
+import { MilvusBlockType } from '@typebot.io/schemas/features/blocks/milvus/constants'
 
-type Props = { type: Block['type'] }
+type Props = { type: Block['type'] | MilvusBlockType }
 
 export const BlockLabel = ({ type }: Props): JSX.Element => {
   const { t } = useTranslate()
@@ -99,7 +100,57 @@ export const BlockLabel = ({ type }: Props): JSX.Element => {
       return (
         <Text fontSize="sm">{t('editor.sidebarBlock.zemanticAi.label')}</Text>
       )
+
+    case MilvusBlockType.CREATE_TICKET:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.createTicket')}
+        </Text>
+      )
+    case MilvusBlockType.BASE_BY_TAG:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.baseByTag')}
+        </Text>
+      )
+    case MilvusBlockType.ARTICLE_BY_ID:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.articleById')}
+        </Text>
+      )
+    case MilvusBlockType.CLIENT_BY_DOCUMENTO:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.clientByDocumento')}
+        </Text>
+      )
+    case MilvusBlockType.CLIENT_BY_EMAIL:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.clientByEmail')}
+        </Text>
+      )
+    case MilvusBlockType.SPEAK_WITH_ATTENDANT:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.speakWithAttendant')}
+        </Text>
+      )
+    case MilvusBlockType.CLOSE_CHAT:
+      return (
+        <Text style={style} fontSize="sm">
+          {t('milvus.label.closeChat')}
+        </Text>
+      )
     default:
       return <ForgedBlockLabel type={type} />
   }
+}
+const style = {
+  width: 100,
+  height: 40,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
 }

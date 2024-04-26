@@ -3,7 +3,7 @@ import { MistralLogo } from './logo'
 import { auth } from './auth'
 import { createChatCompletion } from './actions/createChatCompletion'
 
-export const mistralBlock = createBlock({
+export const mistral = createBlock({
   id: 'mistral',
   name: 'Mistral',
   tags: ['ai', 'chat', 'completion'],

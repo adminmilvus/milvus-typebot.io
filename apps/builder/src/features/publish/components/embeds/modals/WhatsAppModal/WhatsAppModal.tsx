@@ -26,7 +26,7 @@ import { ModalProps } from '../../EmbedButton'
 import { useTypebot } from '@/features/editor/providers/TypebotProvider'
 import { WhatsAppCredentialsModal } from './WhatsAppCredentialsModal'
 import { TextLink } from '@/components/TextLink'
-import { PublishButton } from '../../../PublishButton'
+import { PublishButtonOriginal } from '../../../PublishButtonOriginal'
 import { useParentModal } from '@/features/graph/providers/ParentModalProvider'
 import { trpc } from '@/lib/trpc'
 import { SwitchWithLabel } from '@/components/inputs/SwitchWithLabel'
@@ -293,7 +293,7 @@ export const WhatsAppModal = ({ isOpen, onClose }: ModalProps): JSX.Element => {
                 <ListItem>
                   <HStack>
                     <Text>Publish your bot:</Text>
-                    <PublishButton size="sm" isMoreMenuDisabled />
+                    <PublishButtonOriginal size="sm" isMoreMenuDisabled />
                   </HStack>
                 </ListItem>
                 {phoneNumberData?.id && (

@@ -1,9 +1,8 @@
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 import { inferAsyncReturnType } from '@trpc/server'
-import * as trpcNext from '@trpc/server/adapters/next'
 
-export async function createContext(opts: trpcNext.CreateNextContextOptions) {
-  const user = await getAuthenticatedUser(opts.req, opts.res)
+export async function createContext() {
+  const user = getAuthenticatedUser()
 
   return {
     user,

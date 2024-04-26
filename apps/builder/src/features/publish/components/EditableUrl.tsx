@@ -18,9 +18,11 @@ type EditableUrlProps = {
   pathname?: string
   isValid: (newPathname: string) => Promise<boolean> | boolean
   onPathnameChange: (pathname: string) => void
+  isDisabled?: boolean
 }
 
 export const EditableUrl = ({
+  isDisabled = false,
   hostname,
   pathname,
   isValid,
@@ -38,9 +40,10 @@ export const EditableUrl = ({
     <Editable
       as={HStack}
       spacing={3}
-      value={value}
+      value={value + '/chat_id'}
       onChange={setValue}
       onSubmit={handleSubmit}
+      isDisabled={isDisabled}
     >
       <HStack spacing={1}>
         <Text>{hostname}/</Text>
@@ -59,8 +62,11 @@ export const EditableUrl = ({
       </HStack>
 
       <HStack>
-        <EditButton size="xs" />
-        <CopyButton size="xs" textToCopy={`${hostname}/${value ?? ''}`} />
+        {!isDisabled && <EditButton size="xs" />}
+        <CopyButton
+          size="xs"
+          textToCopy={`${hostname}/${value + '/chat_id' ?? ''}`}
+        />
       </HStack>
     </Editable>
   )
@@ -71,7 +77,7 @@ const EditButton = (props: ButtonProps) => {
 
   return isEditing ? null : (
     <Button leftIcon={<EditIcon />} {...props} {...getEditButtonProps()}>
-      Edit
+      Editar
     </Button>
   )
 }

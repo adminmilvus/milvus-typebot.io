@@ -1,7 +1,7 @@
 import { Select } from '@/components/inputs/Select'
 import { env } from '@typebot.io/env'
 import { GoogleFont } from '@typebot.io/schemas'
-import { defaultFontFamily } from '@typebot.io/schemas/features/typebot/theme/constants'
+import { defaultTheme } from '@typebot.io/schemas/features/typebot/theme/constants'
 import { useState, useEffect } from 'react'
 
 type Props = {
@@ -11,7 +11,8 @@ type Props = {
 
 export const GoogleFontForm = ({ font, onFontChange }: Props) => {
   const [currentFont, setCurrentFont] = useState(
-    (typeof font === 'string' ? font : font?.family) ?? defaultFontFamily
+    (typeof font === 'string' ? font : font?.family) ??
+      defaultTheme.general.font.family
   )
   const [googleFonts, setGoogleFonts] = useState<string[]>([])
 

@@ -261,5 +261,18 @@
   "workspace.settings.modal.menu.settings.label": "Configurações",
   "workspace.settings.modal.menu.version.label": "Versão: {version}",
   "workspace.settings.modal.menu.workspace.label": "Espaço de trabalho",
-  "workspace.settings.name.label": "Nome:"
+  "workspace.settings.name.label": "Nome:",
+
+  "milvus.heading": "Milvus",
+  "milvus.label.createTicket": "Criar Ticket",
+  "milvus.label.baseByTag": "Base por Tag",
+  "milvus.label.articleById": "Artigo por Id",
+  "milvus.label.clientByDocumento": "Cliente pelo Documento",
+  "milvus.label.clientByEmail": "Cliente pelo Email",
+  "milvus.config.testRequest": "Testar a request",
+  "milvus.config.saveVariable": "Salvar variável",
+  "milvus.config.variableValuesToTest": "Variáveis ​​para teste",
+
+  "publishButton.label": "Salvar",
+  "publishButton.published.label": "Salvo"
 }

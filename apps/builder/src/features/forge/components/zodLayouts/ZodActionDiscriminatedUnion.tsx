@@ -4,10 +4,7 @@ import { z } from '@typebot.io/forge/zod'
 import { useMemo } from 'react'
 import { ZodObjectLayout } from './ZodObjectLayout'
 import { isDefined } from '@typebot.io/lib'
-import {
-  ForgedBlockDefinition,
-  ForgedBlock,
-} from '@typebot.io/forge-repository/types'
+import { ForgedBlockDefinition, ForgedBlock } from '@typebot.io/forge-schemas'
 
 type Props = {
   blockDef?: ForgedBlockDefinition

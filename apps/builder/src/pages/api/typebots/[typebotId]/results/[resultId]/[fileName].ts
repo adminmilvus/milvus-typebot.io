@@ -1,6 +1,5 @@
 import prisma from '@typebot.io/lib/prisma'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
 import {
   badRequest,
   methodNotAllowed,
@@ -9,10 +8,11 @@ import {
 } from '@typebot.io/lib/api'
 import { getFileTempUrl } from '@typebot.io/lib/s3/getFileTempUrl'
 import { isReadTypebotForbidden } from '@/features/typebot/helpers/isReadTypebotForbidden'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'GET') {
-    const user = await getAuthenticatedUser(req, res)
+    const user = getAuthenticatedUser()
     if (!user) return notAuthenticated(res)
 
     const typebotId = req.query.typebotId as string

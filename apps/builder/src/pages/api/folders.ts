@@ -6,11 +6,11 @@ import {
   methodNotAllowed,
   notAuthenticated,
 } from '@typebot.io/lib/api'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 // TODO: Delete as it has been migrated to TRPC endpoints
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const user = await getAuthenticatedUser(req, res)
+  const user = getAuthenticatedUser()
   if (!user) return notAuthenticated(res)
 
   const parentFolderId = req.query.parentId

@@ -11,10 +11,7 @@ import {
   HStack,
   Stack,
 } from '@chakra-ui/react'
-import {
-  ForgedBlockDefinition,
-  ForgedBlock,
-} from '@typebot.io/forge-repository/types'
+import { ForgedBlockDefinition, ForgedBlock } from '@typebot.io/forge-schemas'
 import { ReactNode, useMemo } from 'react'
 
 type Props = {

@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
 import {
   badRequest,
   methodNotAllowed,
@@ -7,6 +6,7 @@ import {
 } from '@typebot.io/lib/api'
 import { generatePresignedPostPolicy } from '@typebot.io/lib/s3/generatePresignedPostPolicy'
 import { env } from '@typebot.io/env'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (
   req: NextApiRequest,
@@ -14,7 +14,7 @@ const handler = async (
 ): Promise<void> => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') {
-    const user = await getAuthenticatedUser(req, res)
+    const user = getAuthenticatedUser()
     if (!user) return notAuthenticated(res)
 
     if (!env.S3_ENDPOINT || !env.S3_ACCESS_KEY || !env.S3_SECRET_KEY)

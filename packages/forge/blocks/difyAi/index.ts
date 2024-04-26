@@ -3,7 +3,7 @@ import { DifyAiLogo } from './logo'
 import { auth } from './auth'
 import { createChatMessage } from './actions/createChatMessage'
 
-export const difyAiBlock = createBlock({
+export const difyAi = createBlock({
   id: 'dify-ai',
   name: 'Dify.AI',
   tags: ['dify', 'ai', 'documents', 'files', 'knowledge base'],

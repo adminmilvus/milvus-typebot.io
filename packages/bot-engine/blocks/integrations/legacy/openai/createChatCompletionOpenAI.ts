@@ -13,6 +13,7 @@ import { decrypt } from '@typebot.io/lib/api/encryption/decrypt'
 import { resumeChatCompletion } from './resumeChatCompletion'
 import { parseChatCompletionMessages } from './parseChatCompletionMessages'
 import { executeChatCompletionOpenAIRequest } from './executeChatCompletionOpenAIRequest'
+import { isPlaneteScale } from '@typebot.io/lib/isPlanetScale'
 import prisma from '@typebot.io/lib/prisma'
 import { ExecuteIntegrationResponse } from '../../../../types'
 import { parseVariableNumber } from '@typebot.io/variables/parseVariableNumber'
@@ -22,7 +23,6 @@ import {
   defaultOpenAIOptions,
 } from '@typebot.io/schemas/features/blocks/integrations/openai/constants'
 import { BubbleBlockType } from '@typebot.io/schemas/features/blocks/bubbles/constants'
-import { isPlaneteScale } from '@typebot.io/lib/isPlanetScale'
 
 export const createChatCompletionOpenAI = async (
   state: SessionState,
@@ -84,6 +84,8 @@ export const createChatCompletionOpenAI = async (
   )?.name
 
   if (
+    isPlaneteScale() &&
+    isCredentialsV2(credentials) &&
     newSessionState.isStreamEnabled &&
     !newSessionState.whatsApp &&
     isNextBubbleMessageWithAssistantMessage(typebot)(

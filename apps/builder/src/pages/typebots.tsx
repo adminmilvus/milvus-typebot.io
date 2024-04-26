@@ -1,25 +1,11 @@
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage'
-import { GetServerSidePropsContext } from 'next'
+import { TypebotNotFoundPage } from '@/features/editor/components/TypebotNotFoundPage'
+import { useState } from 'react'
 
 export default function Page() {
-  return <DashboardPage />
-}
+  const [is404] = useState(process.env.NEXT_PUBLIC_MILVUS_PRODUCTION)
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const callbackUrl = context.query.callbackUrl?.toString()
-  const redirectPath =
-    context.query.redirectPath?.toString() ??
-    (callbackUrl
-      ? new URL(callbackUrl).searchParams.get('redirectPath')
-      : undefined)
-  return redirectPath
-    ? {
-        redirect: {
-          permanent: false,
-          destination: redirectPath,
-        },
-      }
-    : { props: {} }
+  if (is404) return <TypebotNotFoundPage />
+
+  return <DashboardPage />
 }

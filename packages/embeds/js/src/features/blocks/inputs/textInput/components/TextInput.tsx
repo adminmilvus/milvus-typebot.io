@@ -6,7 +6,6 @@ import { isMobile } from '@/utils/isMobileSignal'
 import type { TextInputBlock } from '@typebot.io/schemas'
 import { createSignal, onCleanup, onMount } from 'solid-js'
 import { defaultTextInputOptions } from '@typebot.io/schemas/features/blocks/inputs/text/constants'
-import clsx from 'clsx'
 
 type Props = {
   block: TextInputBlock
@@ -21,11 +20,10 @@ export const TextInput = (props: Props) => {
   const handleInput = (inputValue: string) => setInputValue(inputValue)
 
   const checkIfInputIsValid = () =>
-    inputRef?.value !== '' && inputRef?.reportValidity()
+    inputValue() !== '' && inputRef?.reportValidity()
 
   const submit = () => {
-    if (checkIfInputIsValid())
-      props.onSubmit({ value: inputRef?.value ?? inputValue() })
+    if (checkIfInputIsValid()) props.onSubmit({ value: inputValue() })
     else inputRef?.focus()
   }
 
@@ -40,10 +38,7 @@ export const TextInput = (props: Props) => {
   }
 
   onMount(() => {
-    if (!isMobile() && inputRef)
-      inputRef.focus({
-        preventScroll: true,
-      })
+    if (!isMobile() && inputRef) inputRef.focus()
     window.addEventListener('message', processIncomingEvent)
   })
 
@@ -59,10 +54,7 @@ export const TextInput = (props: Props) => {
 
   return (
     <div
-      class={clsx(
-        'flex justify-between pr-2 typebot-input w-full',
-        props.block.options?.isLong ? 'items-end' : 'items-center'
-      )}
+      class={'flex items-end justify-between pr-2 typebot-input w-full'}
       data-testid="input"
       style={{
         'max-width': props.block.options?.isLong ? undefined : '350px',
@@ -92,7 +84,8 @@ export const TextInput = (props: Props) => {
         />
       )}
       <SendButton type="button" class="my-2 ml-2" on:click={submit}>
-        {props.block.options?.labels?.button}
+        {props.block.options?.labels?.button ??
+          defaultTextInputOptions.labels.button}
       </SendButton>
     </div>
   )

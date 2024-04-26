@@ -7,11 +7,11 @@ import {
   notAuthenticated,
 } from '@typebot.io/lib/api'
 import { setUser } from '@sentry/nextjs'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 // TODO: Delete now that we use Google Drive Picker
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const user = await getAuthenticatedUser(req, res)
+  const user = getAuthenticatedUser()
   if (!user) return notAuthenticated(res)
 
   setUser({ id: user.id })

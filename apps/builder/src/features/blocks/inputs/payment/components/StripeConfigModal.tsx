@@ -163,7 +163,6 @@ export const StripeConfigModal = ({
                   placeholder="sk_test_..."
                   withVariableButton={false}
                   debounceTimeout={0}
-                  type="password"
                 />
               </HStack>
             </Stack>
@@ -188,7 +187,6 @@ export const StripeConfigModal = ({
                     placeholder="sk_live_..."
                     withVariableButton={false}
                     debounceTimeout={0}
-                    type="password"
                   />
                 </FormControl>
               </HStack>

@@ -27,7 +27,7 @@ export const BlockNodesList = ({ blocks, groupIndex, groupRef }: Props) => {
     setDraggedBlockType,
   } = useBlockDnd()
   const { typebot, createBlock, detachBlockFromGroup } = useTypebot()
-  const { isReadOnly, graphPosition, setOpenedBlockId } = useGraph()
+  const { isReadOnly, graphPosition } = useGraph()
   const [expandedPlaceholderIndex, setExpandedPlaceholderIndex] = useState<
     number | undefined
   >()
@@ -72,7 +72,7 @@ export const BlockNodesList = ({ blocks, groupIndex, groupRef }: Props) => {
       e.clientY,
       placeholderRefs
     )
-    const blockId = createBlock(
+    createBlock(
       (draggedBlock || draggedBlockType) as BlockV6 | BlockV6['type'],
       {
         groupIndex,
@@ -81,7 +81,6 @@ export const BlockNodesList = ({ blocks, groupIndex, groupRef }: Props) => {
     )
     setDraggedBlock(undefined)
     setDraggedBlockType(undefined)
-    if (blockId) setOpenedBlockId(blockId)
   }
 
   const handleBlockMouseDown =

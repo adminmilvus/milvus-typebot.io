@@ -8,10 +8,7 @@ import {
   timeFilterValues,
   defaultTimeFilter,
 } from '@/features/analytics/constants'
-import {
-  parseFromDateFromTimeFilter,
-  parseToDateFromTimeFilter,
-} from '@/features/analytics/helpers/parseDateFromTimeFilter'
+import { parseDateFromTimeFilter } from '@/features/analytics/helpers/parseDateFromTimeFilter'
 
 const maxLimit = 100
 
@@ -35,7 +32,6 @@ export const getResults = authenticatedProcedure
       limit: z.coerce.number().min(1).max(maxLimit).default(50),
       cursor: z.string().optional(),
       timeFilter: z.enum(timeFilterValues).default(defaultTimeFilter),
-      timeZone: z.string().optional(),
     })
   )
   .output(
@@ -81,11 +77,7 @@ export const getResults = authenticatedProcedure
     if (!typebot || (await isReadTypebotForbidden(typebot, user)))
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Typebot not found' })
 
-    const fromDate = parseFromDateFromTimeFilter(
-      input.timeFilter,
-      input.timeZone
-    )
-    const toDate = parseToDateFromTimeFilter(input.timeFilter, input.timeZone)
+    const date = parseDateFromTimeFilter(input.timeFilter)
 
     const results = await prisma.result.findMany({
       take: limit + 1,
@@ -94,10 +86,9 @@ export const getResults = authenticatedProcedure
         typebotId: typebot.id,
         hasStarted: true,
         isArchived: false,
-        createdAt: fromDate
+        createdAt: date
           ? {
-              gte: fromDate,
-              lte: toDate ?? undefined,
+              gte: date,
             }
           : undefined,
       },

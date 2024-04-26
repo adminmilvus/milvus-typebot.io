@@ -1,5 +1,6 @@
 import { Stack } from '@chakra-ui/react'
 import { useWorkspace } from '@/features/workspace/WorkspaceProvider'
+import { Plan } from '@typebot.io/prisma'
 import React from 'react'
 import { InvoicesList } from './InvoicesList'
 import { ChangePlanForm } from './ChangePlanForm'
@@ -7,7 +8,7 @@ import { UsageProgressBars } from './UsageProgressBars'
 import { CurrentSubscriptionSummary } from './CurrentSubscriptionSummary'
 
 export const BillingSettingsLayout = () => {
-  const { workspace, currentRole } = useWorkspace()
+  const { workspace } = useWorkspace()
 
   if (!workspace) return null
   return (
@@ -15,7 +16,12 @@ export const BillingSettingsLayout = () => {
       <UsageProgressBars workspace={workspace} />
       <Stack spacing="4">
         <CurrentSubscriptionSummary workspace={workspace} />
-        <ChangePlanForm workspace={workspace} currentRole={currentRole} />
+        {workspace.plan !== Plan.CUSTOM &&
+          workspace.plan !== Plan.LIFETIME &&
+          workspace.plan !== Plan.UNLIMITED &&
+          workspace.plan !== Plan.OFFERED && (
+            <ChangePlanForm workspace={workspace} />
+          )}
       </Stack>
 
       {workspace.stripeId && <InvoicesList workspaceId={workspace.id} />}

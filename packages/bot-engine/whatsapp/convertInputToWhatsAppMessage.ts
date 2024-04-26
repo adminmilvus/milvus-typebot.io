@@ -6,7 +6,6 @@ import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/const
 import { defaultPictureChoiceOptions } from '@typebot.io/schemas/features/blocks/inputs/pictureChoice/constants'
 import { defaultChoiceInputOptions } from '@typebot.io/schemas/features/blocks/inputs/choice/constants'
 import { convertRichTextToMarkdown } from '@typebot.io/lib/markdown/convertRichTextToMarkdown'
-import { env } from '@typebot.io/env'
 
 export const convertInputToWhatsAppMessages = (
   input: NonNullable<ContinueChatResponse['input']>,
@@ -111,7 +110,7 @@ export const convertInputToWhatsAppMessages = (
         ]
       const items = groupArrayByArraySize(
         input.items.filter((item) => isDefined(item.content)),
-        env.WHATSAPP_INTERACTIVE_GROUP_SIZE
+        3
       ) as ButtonItem[][]
       return items.map((items, idx) => ({
         type: 'interactive',

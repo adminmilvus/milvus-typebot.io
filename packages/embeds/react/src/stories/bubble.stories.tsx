@@ -50,6 +50,7 @@ export const Default = () => {
           button: {
             backgroundColor: '#FF7537',
             iconColor: 'white',
+            size: 'large',
           },
         }}
         isPreview

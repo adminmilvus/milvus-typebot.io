@@ -1,44 +1,9 @@
 import prisma from '@typebot.io/lib/prisma'
 import { authenticatedProcedure } from '@/helpers/server/trpc'
 import { TRPCError } from '@trpc/server'
-import {
-  typebotSchema,
-  typebotV5Schema,
-  typebotV6Schema,
-} from '@typebot.io/schemas'
 import { z } from 'zod'
-import {
-  isCustomDomainNotAvailable,
-  isPublicIdNotAvailable,
-  sanitizeCustomDomain,
-  sanitizeGroups,
-  sanitizeSettings,
-} from '../helpers/sanitizers'
-import { isWriteTypebotForbidden } from '../helpers/isWriteTypebotForbidden'
-import { isCloudProdInstance } from '@/helpers/isCloudProdInstance'
+import { sanitizeGroups, sanitizeSettings } from '../helpers/sanitizers'
 import { Prisma } from '@typebot.io/prisma'
-import { migrateTypebot } from '@typebot.io/migrations/migrateTypebot'
-
-const typebotUpdateSchemaPick = {
-  version: true,
-  name: true,
-  icon: true,
-  selectedThemeTemplateId: true,
-  groups: true,
-  theme: true,
-  settings: true,
-  folderId: true,
-  variables: true,
-  edges: true,
-  resultsTablePreferences: true,
-  publicId: true,
-  customDomain: true,
-  isClosed: true,
-  whatsAppCredentialsId: true,
-  riskLevel: true,
-  events: true,
-  updatedAt: true,
-} as const
 
 export const updateTypebot = authenticatedProcedure
   .meta({
@@ -52,30 +17,16 @@ export const updateTypebot = authenticatedProcedure
   })
   .input(
     z.object({
-      typebotId: z
-        .string()
-        .describe(
-          "[Where to find my bot's ID?](../how-to#how-to-find-my-typebotid)"
-        ),
-      typebot: z.union([
-        typebotV6Schema.pick(typebotUpdateSchemaPick).partial().openapi({
-          title: 'Typebot V6',
-        }),
-        typebotV5Schema._def.schema
-          .pick(typebotUpdateSchemaPick)
-          .partial()
-          .openapi({
-            title: 'Typebot V5',
-          }),
-      ]),
+      typebotId: z.string(),
+      typebot: z.any(),
     })
   )
   .output(
     z.object({
-      typebot: typebotV6Schema,
+      typebot: z.any(),
     })
   )
-  .mutation(async ({ input: { typebotId, typebot }, ctx: { user } }) => {
+  .mutation(async ({ input: { typebotId, typebot } }) => {
     const existingTypebot = await prisma.typebot.findFirst({
       where: {
         id: typebotId,
@@ -109,60 +60,18 @@ export const updateTypebot = authenticatedProcedure
       },
     })
 
-    if (
-      !existingTypebot?.id ||
-      (await isWriteTypebotForbidden(existingTypebot, user))
-    )
+    if (!existingTypebot?.id)
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Typebot not found',
       })
-
-    if (
-      typebot.updatedAt &&
-      new Date(existingTypebot?.updatedAt).getTime() >
-        typebot.updatedAt.getTime()
-    )
-      throw new TRPCError({
-        code: 'CONFLICT',
-        message: 'Found newer version of the typebot in database',
-      })
-
-    if (
-      typebot.customDomain &&
-      existingTypebot.customDomain !== typebot.customDomain &&
-      (await isCustomDomainNotAvailable({
-        customDomain: typebot.customDomain,
-        workspaceId: existingTypebot.workspace.id,
-      }))
-    )
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Custom domain not available',
-      })
-
-    if (typebot.publicId) {
-      if (isCloudProdInstance() && typebot.publicId.length < 4)
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Public id should be at least 4 characters long',
-        })
-      if (
-        existingTypebot.publicId !== typebot.publicId &&
-        (await isPublicIdNotAvailable(typebot.publicId))
-      )
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Public id not available',
-        })
-    }
 
     const newTypebot = await prisma.typebot.update({
       where: {
         id: existingTypebot.id,
       },
       data: {
-        version: typebot.version ?? undefined,
+        version: typebot.version,
         name: typebot.name,
         icon: typebot.icon,
         selectedThemeTemplateId: typebot.selectedThemeTemplateId,
@@ -185,28 +94,13 @@ export const updateTypebot = authenticatedProcedure
           typebot.resultsTablePreferences === null
             ? Prisma.DbNull
             : typebot.resultsTablePreferences,
-        publicId:
-          typebot.publicId === null
-            ? null
-            : typebot.publicId && isPublicIdValid(typebot.publicId)
-            ? typebot.publicId
-            : undefined,
-        customDomain: await sanitizeCustomDomain({
-          customDomain: typebot.customDomain,
-          workspaceId: existingTypebot.workspace.id,
-        }),
+        publicId: typebot.publicId ?? null,
+        customDomain: typebot.customDomain ?? null,
         isClosed: typebot.isClosed,
         whatsAppCredentialsId: typebot.whatsAppCredentialsId ?? undefined,
         updatedAt: typebot.updatedAt,
       },
     })
 
-    const migratedTypebot = await migrateTypebot(
-      typebotSchema.parse(newTypebot)
-    )
-
-    return { typebot: migratedTypebot }
+    return { typebot: newTypebot }
   })
-
-const isPublicIdValid = (str: string) =>
-  /^([a-z0-9]+-[a-z0-9]*)*$/.test(str) || /^[a-z0-9]*$/.test(str)

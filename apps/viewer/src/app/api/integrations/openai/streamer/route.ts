@@ -4,10 +4,10 @@ import { SessionState } from '@typebot.io/schemas'
 import { StreamingTextResponse } from 'ai'
 import OpenAI from 'openai'
 import { NextResponse } from 'next/dist/server/web/spec-extension/response'
-import { getBlockById } from '@typebot.io/schemas/helpers'
-import { forgedBlocks } from '@typebot.io/forge-repository/definitions'
+import { getBlockById } from '@typebot.io/lib/getBlockById'
+import { forgedBlocks } from '@typebot.io/forge-schemas'
 import { decryptV2 } from '@typebot.io/lib/api/encryption/decryptV2'
-import { VariableStore } from '@typebot.io/forge'
+import { ReadOnlyVariableStore } from '@typebot.io/forge'
 import {
   ParseVariablesOptions,
   parseVariables,
@@ -15,7 +15,6 @@ import {
 import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integrations/constants'
 import { getChatCompletionStream } from '@typebot.io/bot-engine/blocks/integrations/legacy/openai/getChatCompletionStream'
 import { ChatCompletionOpenAIOptions } from '@typebot.io/schemas/features/blocks/integrations/openai/schema'
-import { isForgedBlockType } from '@typebot.io/schemas/features/blocks/forged/helpers'
 
 export const runtime = 'edge'
 export const preferredRegion = 'lhr1'
@@ -38,7 +37,6 @@ export async function OPTIONS() {
   })
 }
 
-// Deprecated in favor of `/api/v1/sessions/:sessionId/streamMessage`.
 export async function POST(req: Request) {
   const { sessionId, messages } = (await req.json()) as {
     messages: OpenAI.Chat.ChatCompletionMessage[] | undefined
@@ -111,13 +109,7 @@ export async function POST(req: Request) {
       }
     }
   }
-  if (!isForgedBlockType(block.type))
-    return NextResponse.json(
-      { message: 'Invalid forged block id' },
-      { status: 400, headers: responseHeaders }
-    )
-
-  const blockDef = forgedBlocks[block.type]
+  const blockDef = forgedBlocks.find((b) => b.id === block.type)
   const action = blockDef?.actions.find((a) => a.name === block.options?.action)
 
   if (!action || !action.run?.stream)
@@ -141,7 +133,7 @@ export async function POST(req: Request) {
       credentials.data,
       credentials.iv
     )
-    const variables: VariableStore = {
+    const variables: ReadOnlyVariableStore = {
       list: () => state.typebotsQueue[0].typebot.variables,
       get: (id: string) => {
         const variable = state.typebotsQueue[0].typebot.variables.find(
@@ -151,8 +143,6 @@ export async function POST(req: Request) {
       },
       parse: (text: string, params?: ParseVariablesOptions) =>
         parseVariables(state.typebotsQueue[0].typebot.variables, params)(text),
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      set: (_1: string, _2: unknown) => {},
     }
     const stream = await action.run.stream.run({
       credentials: decryptedCredentials,

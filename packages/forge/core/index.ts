@@ -1,6 +1,6 @@
-import { ZodRawShape, ZodTypeAny } from 'zod'
+import { ZodRawShape } from 'zod'
 import { AuthDefinition, BlockDefinition, ActionDefinition } from './types'
-import { ZodLayoutMetadata, z } from './zod'
+import { z } from './zod'
 
 export const variableStringSchema = z.custom<`{{${string}}}`>((val) =>
   /^{{.+}}$/g.test(val as string)
@@ -89,7 +89,7 @@ export const parseBlockCredentials = <
 >(
   blockDefinition: BlockDefinition<I, A, O>
 ) => {
-  if (!blockDefinition.auth) return null
+  if (!blockDefinition.auth) throw new Error('Block has no auth definition')
   return z.object({
     id: z.string(),
     type: z.literal(blockDefinition.id),
@@ -137,31 +137,17 @@ export const option = {
       z.object({ [field]: z.undefined() }),
       ...schemas,
     ]),
-  saveResponseArray: <I extends readonly [string, ...string[]]>(
-    items: I,
-    layouts?: {
-      item?: ZodLayoutMetadata<ZodTypeAny>
-      variableId?: ZodLayoutMetadata<ZodTypeAny>
-    }
-  ) =>
+  saveResponseArray: <I extends readonly [string, ...string[]]>(items: I) =>
     z
       .array(
         z.object({
-          item: z
-            .enum(items)
-            .optional()
-            .layout({
-              ...(layouts?.item ?? {}),
-              placeholder: 'Select a response',
-              defaultValue: items[0],
-            }),
-          variableId: z
-            .string()
-            .optional()
-            .layout({
-              ...(layouts?.variableId ?? {}),
-              inputType: 'variableDropdown',
-            }),
+          item: z.enum(items).optional().layout({
+            placeholder: 'Select a response',
+            defaultValue: items[0],
+          }),
+          variableId: z.string().optional().layout({
+            inputType: 'variableDropdown',
+          }),
         })
       )
       .optional(),

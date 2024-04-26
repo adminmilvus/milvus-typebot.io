@@ -89,7 +89,7 @@ const WorkspaceRoleMenuButton = ({
   onChange: (role: WorkspaceRole) => void
 }) => {
   return (
-    <Menu placement="bottom" isLazy matchWidth>
+    <Menu placement="bottom-end" isLazy matchWidth>
       <MenuButton
         flexShrink={0}
         as={Button}

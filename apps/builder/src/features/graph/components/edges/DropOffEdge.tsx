@@ -18,8 +18,7 @@ import {
   TotalVisitedEdges,
 } from '@typebot.io/schemas/features/analytics'
 import { computeTotalUsersAtBlock } from '@/features/analytics/helpers/computeTotalUsersAtBlock'
-import { byId } from '@typebot.io/lib'
-import { blockHasItems } from '@typebot.io/schemas/helpers'
+import { blockHasItems, byId } from '@typebot.io/lib'
 import { groupWidth } from '../../constants'
 import { getTotalAnswersAtBlock } from '@/features/analytics/helpers/getTotalAnswersAtBlock'
 import { useGroupsStore } from '../../hooks/useGroupsStore'

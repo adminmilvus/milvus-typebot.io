@@ -11,8 +11,7 @@ import {
   UrlInputBlock,
   Variable,
 } from '@typebot.io/schemas'
-import { isDefined } from '@typebot.io/lib'
-import { isInputBlock } from '@typebot.io/schemas/helpers'
+import { isDefined, isInputBlock } from '@typebot.io/lib'
 import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/constants'
 import { BubbleBlockType } from '@typebot.io/schemas/features/blocks/bubbles/constants'
 

@@ -3,7 +3,11 @@ import {
   startChatInputSchema,
   startChatResponseSchema,
 } from '@typebot.io/schemas/features/chat/schema'
-import { startChat as startChatFn } from '@typebot.io/bot-engine/apiHandlers/startChat'
+import { startSession } from '@typebot.io/bot-engine/startSession'
+import { saveStateToDatabase } from '@typebot.io/bot-engine/saveStateToDatabase'
+import { restartSession } from '@typebot.io/bot-engine/queries/restartSession'
+import { filterPotentiallySensitiveLogs } from '@typebot.io/bot-engine/logs/filterPotentiallySensitiveLogs'
+import { computeCurrentProgress } from '@typebot.io/bot-engine/computeCurrentProgress'
 
 export const startChat = publicProcedure
   .meta({
@@ -15,11 +19,101 @@ export const startChat = publicProcedure
   })
   .input(startChatInputSchema)
   .output(startChatResponseSchema)
-  .mutation(async ({ input, ctx: { origin, res } }) => {
-    const { corsOrigin, ...response } = await startChatFn({
-      ...input,
-      origin,
-    })
-    if (corsOrigin) res.setHeader('Access-Control-Allow-Origin', corsOrigin)
-    return response
-  })
+  .mutation(
+    async ({
+      input: {
+        message,
+        isOnlyRegistering,
+        publicId,
+        isStreamEnabled,
+        prefilledVariables,
+        resultId: startResultId,
+        chat_id,
+      },
+      ctx: { origin, res },
+    }) => {
+      const {
+        typebot,
+        messages,
+        input,
+        resultId,
+        dynamicTheme,
+        logs,
+        clientSideActions,
+        newSessionState,
+        visitedEdges,
+      } = await startSession({
+        version: 2,
+        startParams: {
+          type: 'live',
+          isOnlyRegistering,
+          isStreamEnabled,
+          publicId,
+          prefilledVariables,
+          resultId: startResultId,
+        },
+        chat_id,
+        message,
+      })
+
+      if (
+        newSessionState.allowedOrigins &&
+        newSessionState.allowedOrigins.length > 0
+      ) {
+        if (origin && newSessionState.allowedOrigins.includes(origin))
+          res.setHeader('Access-Control-Allow-Origin', origin)
+        else
+          res.setHeader(
+            'Access-Control-Allow-Origin',
+            newSessionState.allowedOrigins[0]
+          )
+      }
+
+      const session = isOnlyRegistering
+        ? await restartSession({
+            state: newSessionState,
+          })
+        : await saveStateToDatabase({
+            session: {
+              state: newSessionState,
+            },
+            input,
+            logs,
+            clientSideActions,
+            visitedEdges,
+            hasCustomEmbedBubble: messages.some(
+              (message) => message.type === 'custom-embed'
+            ),
+          })
+
+      const isEnded =
+        newSessionState.progressMetadata &&
+        !input?.id &&
+        (clientSideActions?.filter((c) => c.expectsDedicatedReply).length ??
+          0) === 0
+
+      return {
+        sessionId: session.id,
+        typebot: {
+          id: typebot.id,
+          theme: typebot.theme,
+          settings: typebot.settings,
+        },
+        messages,
+        input,
+        resultId,
+        dynamicTheme,
+        logs: logs?.filter(filterPotentiallySensitiveLogs),
+        clientSideActions,
+        progress: newSessionState.progressMetadata
+          ? isEnded
+            ? 100
+            : computeCurrentProgress({
+                typebotsQueue: newSessionState.typebotsQueue,
+                progressMetadata: newSessionState.progressMetadata,
+                currentInputBlockId: input?.id as string,
+              })
+          : undefined,
+      }
+    }
+  )

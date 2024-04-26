@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React from 'react'
 import {
   Alert,
   AlertIcon,
@@ -16,6 +16,7 @@ import {
 import { useRouter } from 'next/router'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { GripIcon } from '@/components/icons'
+import { useTypebotDnd } from '../TypebotDndProvider'
 import { useDebounce } from 'use-debounce'
 import { useToast } from '@/hooks/useToast'
 import { MoreButton } from './MoreButton'
@@ -25,41 +26,29 @@ import { TypebotInDashboard } from '@/features/dashboard/types'
 import { isMobile } from '@/helpers/isMobile'
 import { trpc, trpcVanilla } from '@/lib/trpc'
 import { duplicateName } from '@/features/typebot/helpers/duplicateName'
-import {
-  NodePosition,
-  useDragDistance,
-} from '@/features/graph/providers/GraphDndProvider'
 
 type Props = {
   typebot: TypebotInDashboard
   isReadOnly?: boolean
-  draggedTypebot: TypebotInDashboard | undefined
   onTypebotUpdated: () => void
-  onDrag: (position: NodePosition) => void
+  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-const TypebotButton = ({
+export const TypebotButton = ({
   typebot,
   isReadOnly = false,
-  draggedTypebot,
   onTypebotUpdated,
-  onDrag,
+  onMouseDown,
 }: Props) => {
   const { t } = useTranslate()
   const router = useRouter()
+  const { draggedTypebot } = useTypebotDnd()
   const [draggedTypebotDebounced] = useDebounce(draggedTypebot, 200)
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure()
-  const buttonRef = React.useRef<HTMLDivElement>(null)
-
-  useDragDistance({
-    ref: buttonRef,
-    onDrag,
-    deps: [],
-  })
 
   const { showToast } = useToast()
 
@@ -136,7 +125,6 @@ const TypebotButton = ({
 
   return (
     <Button
-      ref={buttonRef}
       as={WrapItem}
       onClick={handleTypebotClick}
       display="flex"
@@ -146,7 +134,8 @@ const TypebotButton = ({
       h="270px"
       rounded="lg"
       whiteSpace="normal"
-      opacity={draggedTypebot ? 0.3 : 1}
+      opacity={draggedTypebot?.id === typebot.id ? 0.2 : 1}
+      onMouseDown={onMouseDown}
       cursor="pointer"
     >
       {typebot.publishedTypebotId && (
@@ -234,14 +223,3 @@ const TypebotButton = ({
     </Button>
   )
 }
-
-export default memo(
-  TypebotButton,
-  (prev, next) =>
-    prev.draggedTypebot?.id === next.draggedTypebot?.id &&
-    prev.typebot.id === next.typebot.id &&
-    prev.isReadOnly === next.isReadOnly &&
-    prev.typebot.name === next.typebot.name &&
-    prev.typebot.icon === next.typebot.icon &&
-    prev.typebot.publishedTypebotId === next.typebot.publishedTypebotId
-)

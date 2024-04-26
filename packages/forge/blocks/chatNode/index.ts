@@ -3,7 +3,7 @@ import { ChatNodeLogo } from './logo'
 import { auth } from './auth'
 import { sendMessage } from './actions/sendMessage'
 
-export const chatNodeBlock = createBlock({
+export const chatNode = createBlock({
   id: 'chat-node',
   name: 'ChatNode',
   tags: ['ai', 'openai', 'document', 'url'],

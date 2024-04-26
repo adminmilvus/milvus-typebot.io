@@ -9,22 +9,22 @@ import { useTranslate } from '@tolgee/react'
 
 export const MyAccountForm = () => {
   const { t } = useTranslate()
-  const { user, updateUser } = useUser()
+  const { user } = useUser()
   const [name, setName] = useState(user?.name ?? '')
   const [email, setEmail] = useState(user?.email ?? '')
 
-  const handleFileUploaded = async (url: string) => {
-    updateUser({ image: url })
-  }
+  // const handleFileUploaded = async (url: string) => {
+  //   updateUser({ image: url })
+  // }
 
   const handleNameChange = (newName: string) => {
     setName(newName)
-    updateUser({ name: newName })
+    // updateUser({ name: newName })
   }
 
   const handleEmailChange = (newEmail: string) => {
     setEmail(newEmail)
-    updateUser({ email: newEmail })
+    // updateUser({ email: newEmail })
   }
 
   return (
@@ -45,7 +45,7 @@ export const MyAccountForm = () => {
                 fileName: 'avatar',
               }}
               leftIcon={<UploadIcon />}
-              onFileUploaded={handleFileUploaded}
+              onFileUploaded={() => {}}
             >
               {t('account.myAccount.changePhotoButton.label')}
             </UploadButton>

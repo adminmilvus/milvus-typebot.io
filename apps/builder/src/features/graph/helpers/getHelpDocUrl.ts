@@ -1,4 +1,4 @@
-import { ForgedBlockDefinition } from '@typebot.io/forge-repository/types'
+import { ForgedBlockDefinition } from '@typebot.io/forge-schemas'
 import { BlockWithOptions } from '@typebot.io/schemas'
 import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/constants'
 import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integrations/constants'

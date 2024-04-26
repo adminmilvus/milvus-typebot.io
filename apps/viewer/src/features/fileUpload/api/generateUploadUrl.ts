@@ -7,7 +7,7 @@ import prisma from '@typebot.io/lib/prisma'
 import { getSession } from '@typebot.io/bot-engine/queries/getSession'
 import { parseGroups } from '@typebot.io/schemas'
 import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/constants'
-import { getBlockById } from '@typebot.io/schemas/helpers'
+import { getBlockById } from '@typebot.io/lib/getBlockById'
 
 export const generateUploadUrl = publicProcedure
   .meta({

@@ -6,8 +6,7 @@ import { z } from 'zod'
 import { parseGroups } from '@typebot.io/schemas/features/typebot/group'
 import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integrations/constants'
 import { Block } from '@typebot.io/schemas'
-import { isWebhookBlock } from '@typebot.io/schemas/helpers'
-import { byId } from '@typebot.io/lib'
+import { byId, isWebhookBlock } from '@typebot.io/lib'
 
 export const listWebhookBlocks = authenticatedProcedure
   .meta({

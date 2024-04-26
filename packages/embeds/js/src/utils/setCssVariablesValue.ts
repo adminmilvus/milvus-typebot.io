@@ -1,122 +1,56 @@
 import {
   Background,
   ChatTheme,
-  ContainerBorderTheme,
-  ContainerTheme,
+  ContainerColors,
   GeneralTheme,
-  InputTheme,
+  InputColors,
   Theme,
 } from '@typebot.io/schemas'
 import { isLight, hexToRgb } from '@typebot.io/lib/hexToRgb'
-import { isDefined, isEmpty } from '@typebot.io/lib'
+import { isNotEmpty } from '@typebot.io/lib'
 import {
   BackgroundType,
-  defaultBackgroundColor,
-  defaultBackgroundType,
-  defaultButtonsBackgroundColor,
-  defaultButtonsColor,
-  defaultButtonsBorderThickness,
-  defaultContainerBackgroundColor,
-  defaultContainerMaxHeight,
-  defaultContainerMaxWidth,
-  defaultDarkTextColor,
-  defaultFontFamily,
-  defaultGuestBubblesBackgroundColor,
-  defaultGuestBubblesColor,
-  defaultHostBubblesBackgroundColor,
-  defaultHostBubblesColor,
-  defaultInputsBackgroundColor,
-  defaultInputsColor,
-  defaultInputsPlaceholderColor,
-  defaultLightTextColor,
-  defaultProgressBarBackgroundColor,
-  defaultProgressBarColor,
-  defaultProgressBarPlacement,
-  defaultProgressBarPosition,
-  defaultProgressBarThickness,
-  defaultInputsShadow,
-  defaultOpacity,
-  defaultBlur,
-  defaultRoundness,
+  defaultTheme,
 } from '@typebot.io/schemas/features/typebot/theme/constants'
-import { isChatContainerLight } from '@typebot.io/theme/isChatContainerLight'
 
 const cssVariableNames = {
   general: {
     bgImage: '--typebot-container-bg-image',
     bgColor: '--typebot-container-bg-color',
     fontFamily: '--typebot-container-font-family',
+    color: '--typebot-container-color',
     progressBar: {
       position: '--typebot-progress-bar-position',
       color: '--typebot-progress-bar-color',
-      colorRgb: '--typebot-progress-bar-bg-rgb',
+      colorRgb: '--typebot-progress-bar-color-rgb',
       height: '--typebot-progress-bar-height',
       top: '--typebot-progress-bar-top',
       bottom: '--typebot-progress-bar-bottom',
     },
   },
   chat: {
-    container: {
-      maxWidth: '--typebot-chat-container-max-width',
-      maxHeight: '--typebot-chat-container-max-height',
-      bgColor: '--typebot-chat-container-bg-rgb',
-      color: '--typebot-chat-container-color',
-      borderRadius: '--typebot-chat-container-border-radius',
-      borderWidth: '--typebot-chat-container-border-width',
-      borderColor: '--typebot-chat-container-border-rgb',
-      borderOpacity: '--typebot-chat-container-border-opacity',
-      opacity: '--typebot-chat-container-opacity',
-      blur: '--typebot-chat-container-blur',
-      boxShadow: '--typebot-chat-container-box-shadow',
-    },
     hostBubbles: {
-      bgColor: '--typebot-host-bubble-bg-rgb',
+      bgColor: '--typebot-host-bubble-bg-color',
       color: '--typebot-host-bubble-color',
-      borderRadius: '--typebot-host-bubble-border-radius',
-      borderWidth: '--typebot-host-bubble-border-width',
-      borderColor: '--typebot-host-bubble-border-rgb',
-      borderOpacity: '--typebot-host-bubble-border-opacity',
-      opacity: '--typebot-host-bubble-opacity',
-      blur: '--typebot-host-bubble-blur',
-      boxShadow: '--typebot-host-bubble-box-shadow',
     },
     guestBubbles: {
-      bgColor: '--typebot-guest-bubble-bg-rgb',
+      bgColor: '--typebot-guest-bubble-bg-color',
       color: '--typebot-guest-bubble-color',
-      borderRadius: '--typebot-guest-bubble-border-radius',
-      borderWidth: '--typebot-guest-bubble-border-width',
-      borderColor: '--typebot-guest-bubble-border-rgb',
-      borderOpacity: '--typebot-guest-bubble-border-opacity',
-      opacity: '--typebot-guest-bubble-opacity',
-      blur: '--typebot-guest-bubble-blur',
-      boxShadow: '--typebot-guest-bubble-box-shadow',
     },
     inputs: {
-      bgColor: '--typebot-input-bg-rgb',
+      bgColor: '--typebot-input-bg-color',
       color: '--typebot-input-color',
       placeholderColor: '--typebot-input-placeholder-color',
-      borderRadius: '--typebot-input-border-radius',
-      borderWidth: '--typebot-input-border-width',
-      borderColor: '--typebot-input-border-rgb',
-      borderOpacity: '--typebot-input-border-opacity',
-      opacity: '--typebot-input-opacity',
-      blur: '--typebot-input-blur',
-      boxShadow: '--typebot-input-box-shadow',
     },
     buttons: {
-      bgRgb: '--typebot-button-bg-rgb',
+      bgColor: '--typebot-button-bg-color',
+      bgColorRgb: '--typebot-button-bg-color-rgb',
       color: '--typebot-button-color',
-      borderRadius: '--typebot-button-border-radius',
-      borderWidth: '--typebot-button-border-width',
-      borderColor: '--typebot-button-border-rgb',
-      borderOpacity: '--typebot-button-border-opacity',
-      opacity: '--typebot-button-opacity',
-      blur: '--typebot-button-blur',
-      boxShadow: '--typebot-button-box-shadow',
     },
     checkbox: {
-      bgRgb: '--typebot-checkbox-bg-rgb',
-      alphaRatio: '--selectable-alpha-ratio',
+      bgColor: '--typebot-checkbox-bg-color',
+      color: '--typebot-checkbox-color',
+      baseAlpha: '--selectable-base-alpha',
     },
   },
 } as const
@@ -129,31 +63,43 @@ export const setCssVariablesValue = (
   if (!theme) return
   const documentStyle = container?.style
   if (!documentStyle) return
-  setGeneralTheme(theme.general, documentStyle, isPreview)
-  setChatTheme(theme.chat, theme.general?.background, documentStyle)
+  setGeneralTheme(
+    theme.general ?? defaultTheme.general,
+    documentStyle,
+    isPreview
+  )
+  setChatTheme(theme.chat ?? defaultTheme.chat, documentStyle)
 }
 
 const setGeneralTheme = (
-  generalTheme: GeneralTheme | undefined,
+  generalTheme: GeneralTheme,
   documentStyle: CSSStyleDeclaration,
   isPreview?: boolean
 ) => {
-  setGeneralBackground(generalTheme?.background, documentStyle)
+  setTypebotBackground(
+    generalTheme.background ?? defaultTheme.general.background,
+    documentStyle
+  )
   documentStyle.setProperty(
     cssVariableNames.general.fontFamily,
-    (typeof generalTheme?.font === 'string'
+    (typeof generalTheme.font === 'string'
       ? generalTheme.font
-      : generalTheme?.font?.family) ?? defaultFontFamily
+      : generalTheme.font?.family) ?? defaultTheme.general.font.family
   )
-  setProgressBar(generalTheme?.progressBar, documentStyle, isPreview)
+  setProgressBar(
+    generalTheme.progressBar ?? defaultTheme.general.progressBar,
+    documentStyle,
+    isPreview
+  )
 }
 
 const setProgressBar = (
-  progressBar: GeneralTheme['progressBar'],
+  progressBar: NonNullable<GeneralTheme['progressBar']>,
   documentStyle: CSSStyleDeclaration,
   isPreview?: boolean
 ) => {
-  const position = progressBar?.position ?? defaultProgressBarPosition
+  const position =
+    progressBar.position ?? defaultTheme.general.progressBar.position
 
   documentStyle.setProperty(
     cssVariableNames.general.progressBar.position,
@@ -161,20 +107,22 @@ const setProgressBar = (
   )
   documentStyle.setProperty(
     cssVariableNames.general.progressBar.color,
-    progressBar?.color ?? defaultProgressBarColor
+    progressBar.color ?? defaultTheme.general.progressBar.color
   )
   documentStyle.setProperty(
     cssVariableNames.general.progressBar.colorRgb,
     hexToRgb(
-      progressBar?.backgroundColor ?? defaultProgressBarBackgroundColor
+      progressBar.backgroundColor ??
+        defaultTheme.general.progressBar.backgroundColor
     ).join(', ')
   )
   documentStyle.setProperty(
     cssVariableNames.general.progressBar.height,
-    `${progressBar?.thickness ?? defaultProgressBarThickness}px`
+    `${progressBar.thickness ?? defaultTheme.general.progressBar.thickness}px`
   )
 
-  const placement = progressBar?.placement ?? defaultProgressBarPlacement
+  const placement =
+    progressBar.placement ?? defaultTheme.general.progressBar.placement
 
   documentStyle.setProperty(
     cssVariableNames.general.progressBar.top,
@@ -188,439 +136,123 @@ const setProgressBar = (
 }
 
 const setChatTheme = (
-  chatTheme: ChatTheme | undefined,
-  generalBackground: GeneralTheme['background'],
+  chatTheme: ChatTheme,
   documentStyle: CSSStyleDeclaration
 ) => {
-  setChatContainer(
-    chatTheme?.container,
-    generalBackground,
-    documentStyle,
-    chatTheme?.roundness
+  setHostBubbles(
+    chatTheme.hostBubbles ?? defaultTheme.chat.hostBubbles,
+    documentStyle
   )
-  setHostBubbles(chatTheme?.hostBubbles, documentStyle, chatTheme?.roundness)
-  setGuestBubbles(chatTheme?.guestBubbles, documentStyle, chatTheme?.roundness)
-  setButtons(chatTheme?.buttons, documentStyle, chatTheme?.roundness)
-  setInputs(chatTheme?.inputs, documentStyle, chatTheme?.roundness)
-  setCheckbox(chatTheme?.container, generalBackground, documentStyle)
-}
-
-const setChatContainer = (
-  container: ChatTheme['container'],
-  generalBackground: GeneralTheme['background'],
-  documentStyle: CSSStyleDeclaration,
-  legacyRoundness?: ChatTheme['roundness']
-) => {
-  const chatContainerBgColor =
-    container?.backgroundColor ?? defaultContainerBackgroundColor
-  const isBgDisabled =
-    chatContainerBgColor === 'transparent' || isEmpty(chatContainerBgColor)
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.bgColor,
-    isBgDisabled ? '0, 0, 0' : hexToRgb(chatContainerBgColor).join(', ')
+  setGuestBubbles(
+    chatTheme.guestBubbles ?? defaultTheme.chat.guestBubbles,
+    documentStyle
   )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.color,
-    hexToRgb(
-      container?.color ??
-        (isChatContainerLight({
-          chatContainer: container,
-          generalBackground,
-        })
-          ? defaultLightTextColor
-          : defaultDarkTextColor)
-    ).join(', ')
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.maxWidth,
-    container?.maxWidth ?? defaultContainerMaxWidth
-  )
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.maxHeight,
-    container?.maxHeight ?? defaultContainerMaxHeight
-  )
-  const opacity = isBgDisabled
-    ? '1'
-    : (container?.opacity ?? defaultOpacity).toString()
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.opacity,
-    isBgDisabled ? '0' : (container?.opacity ?? defaultOpacity).toString()
-  )
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.blur,
-    opacity === '1' || isBgDisabled
-      ? '0xp'
-      : `${container?.blur ?? defaultBlur}px`
-  )
-  setShadow(
-    container?.shadow,
-    documentStyle,
-    cssVariableNames.chat.container.boxShadow
-  )
-
-  setBorderRadius(
-    container?.border ?? {
-      roundeness: legacyRoundness ?? defaultRoundness,
-    },
-    documentStyle,
-    cssVariableNames.chat.container.borderRadius
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.borderWidth,
-    isDefined(container?.border?.thickness)
-      ? `${container?.border?.thickness}px`
-      : '0'
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.borderOpacity,
-    isDefined(container?.border?.opacity)
-      ? container.border.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.container.borderColor,
-    hexToRgb(container?.border?.color ?? '').join(', ')
+  setButtons(chatTheme.buttons ?? defaultTheme.chat.buttons, documentStyle)
+  setInputs(chatTheme.inputs ?? defaultTheme.chat.inputs, documentStyle)
+  setRoundness(
+    chatTheme.roundness ?? defaultTheme.chat.roundness,
+    documentStyle
   )
 }
 
 const setHostBubbles = (
-  hostBubbles: ContainerTheme | undefined,
-  documentStyle: CSSStyleDeclaration,
-  legacyRoundness?: ChatTheme['roundness']
+  hostBubbles: ContainerColors,
+  documentStyle: CSSStyleDeclaration
 ) => {
   documentStyle.setProperty(
     cssVariableNames.chat.hostBubbles.bgColor,
-    hexToRgb(
-      hostBubbles?.backgroundColor ?? defaultHostBubblesBackgroundColor
-    ).join(', ')
+    hostBubbles.backgroundColor ?? defaultTheme.chat.hostBubbles.backgroundColor
   )
   documentStyle.setProperty(
     cssVariableNames.chat.hostBubbles.color,
-    hostBubbles?.color ?? defaultHostBubblesColor
-  )
-  setBorderRadius(
-    hostBubbles?.border ?? {
-      roundeness: legacyRoundness ?? defaultRoundness,
-    },
-    documentStyle,
-    cssVariableNames.chat.hostBubbles.borderRadius
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.hostBubbles.borderWidth,
-    isDefined(hostBubbles?.border?.thickness)
-      ? `${hostBubbles?.border?.thickness}px`
-      : '0'
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.hostBubbles.borderColor,
-    hexToRgb(hostBubbles?.border?.color ?? '').join(', ')
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.hostBubbles.opacity,
-    hostBubbles?.backgroundColor === 'transparent'
-      ? '0'
-      : isDefined(hostBubbles?.opacity)
-      ? hostBubbles.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.hostBubbles.borderOpacity,
-    isDefined(hostBubbles?.border?.opacity)
-      ? hostBubbles.border.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.hostBubbles.blur,
-    isDefined(hostBubbles?.blur) ? `${hostBubbles.blur ?? 0}px` : 'none'
-  )
-
-  setShadow(
-    hostBubbles?.shadow,
-    documentStyle,
-    cssVariableNames.chat.hostBubbles.boxShadow
+    hostBubbles.color ?? defaultTheme.chat.hostBubbles.color
   )
 }
 
 const setGuestBubbles = (
-  guestBubbles: ContainerTheme | undefined,
-  documentStyle: CSSStyleDeclaration,
-  legacyRoundness?: ChatTheme['roundness']
+  guestBubbles: ContainerColors,
+  documentStyle: CSSStyleDeclaration
 ) => {
   documentStyle.setProperty(
     cssVariableNames.chat.guestBubbles.bgColor,
-    hexToRgb(
-      guestBubbles?.backgroundColor ?? defaultGuestBubblesBackgroundColor
-    ).join(', ')
+    guestBubbles.backgroundColor ??
+      defaultTheme.chat.guestBubbles.backgroundColor
   )
-
   documentStyle.setProperty(
     cssVariableNames.chat.guestBubbles.color,
-    guestBubbles?.color ?? defaultGuestBubblesColor
-  )
-
-  setBorderRadius(
-    guestBubbles?.border ?? {
-      roundeness: legacyRoundness ?? defaultRoundness,
-    },
-    documentStyle,
-    cssVariableNames.chat.guestBubbles.borderRadius
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.guestBubbles.borderWidth,
-    isDefined(guestBubbles?.border?.thickness)
-      ? `${guestBubbles?.border?.thickness}px`
-      : '0'
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.guestBubbles.borderColor,
-    hexToRgb(guestBubbles?.border?.color ?? '').join(', ')
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.guestBubbles.borderOpacity,
-    isDefined(guestBubbles?.border?.opacity)
-      ? guestBubbles.border.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.guestBubbles.opacity,
-    guestBubbles?.backgroundColor === 'transparent'
-      ? '0'
-      : isDefined(guestBubbles?.opacity)
-      ? guestBubbles.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.guestBubbles.blur,
-    isDefined(guestBubbles?.blur) ? `${guestBubbles.blur ?? 0}px` : 'none'
-  )
-
-  setShadow(
-    guestBubbles?.shadow,
-    documentStyle,
-    cssVariableNames.chat.guestBubbles.boxShadow
+    guestBubbles.color ?? defaultTheme.chat.guestBubbles.color
   )
 }
 
 const setButtons = (
-  buttons: ContainerTheme | undefined,
-  documentStyle: CSSStyleDeclaration,
-  legacyRoundness?: ChatTheme['roundness']
+  buttons: ContainerColors,
+  documentStyle: CSSStyleDeclaration
 ) => {
-  const bgColor = buttons?.backgroundColor ?? defaultButtonsBackgroundColor
-
+  const bgColor =
+    buttons.backgroundColor ?? defaultTheme.chat.buttons.backgroundColor
+  documentStyle.setProperty(cssVariableNames.chat.buttons.bgColor, bgColor)
   documentStyle.setProperty(
-    cssVariableNames.chat.buttons.bgRgb,
-    hexToRgb(bgColor).join(', ')
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.buttons.bgRgb,
+    cssVariableNames.chat.buttons.bgColorRgb,
     hexToRgb(bgColor).join(', ')
   )
 
   documentStyle.setProperty(
     cssVariableNames.chat.buttons.color,
-    buttons?.color ?? defaultButtonsColor
-  )
-
-  setBorderRadius(
-    buttons?.border ?? {
-      roundeness: legacyRoundness ?? defaultRoundness,
-    },
-    documentStyle,
-    cssVariableNames.chat.buttons.borderRadius
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.buttons.borderWidth,
-    isDefined(buttons?.border?.thickness)
-      ? `${buttons?.border?.thickness}px`
-      : `${defaultButtonsBorderThickness}px`
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.buttons.borderColor,
-    hexToRgb(
-      buttons?.border?.color ??
-        buttons?.backgroundColor ??
-        defaultButtonsBackgroundColor
-    ).join(', ')
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.buttons.borderOpacity,
-    isDefined(buttons?.border?.opacity)
-      ? buttons.border.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.buttons.opacity,
-    buttons?.backgroundColor === 'transparent'
-      ? '0'
-      : isDefined(buttons?.opacity)
-      ? buttons.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.buttons.blur,
-    isDefined(buttons?.blur) ? `${buttons.blur ?? 0}px` : 'none'
-  )
-
-  setShadow(
-    buttons?.shadow,
-    documentStyle,
-    cssVariableNames.chat.buttons.boxShadow
+    buttons.color ?? defaultTheme.chat.buttons.color
   )
 }
 
-const setInputs = (
-  inputs: InputTheme | undefined,
-  documentStyle: CSSStyleDeclaration,
-  legacyRoundness?: ChatTheme['roundness']
-) => {
+const setInputs = (inputs: InputColors, documentStyle: CSSStyleDeclaration) => {
   documentStyle.setProperty(
     cssVariableNames.chat.inputs.bgColor,
-    hexToRgb(inputs?.backgroundColor ?? defaultInputsBackgroundColor).join(', ')
+    inputs.backgroundColor ?? defaultTheme.chat.inputs.backgroundColor
   )
-
   documentStyle.setProperty(
     cssVariableNames.chat.inputs.color,
-    inputs?.color ?? defaultInputsColor
+    inputs.color ?? defaultTheme.chat.inputs.color
   )
-
   documentStyle.setProperty(
     cssVariableNames.chat.inputs.placeholderColor,
-    inputs?.placeholderColor ?? defaultInputsPlaceholderColor
-  )
-
-  setBorderRadius(
-    inputs?.border ?? {
-      roundeness: legacyRoundness ?? defaultRoundness,
-    },
-    documentStyle,
-    cssVariableNames.chat.inputs.borderRadius
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.inputs.borderWidth,
-    isDefined(inputs?.border?.thickness)
-      ? `${inputs?.border?.thickness}px`
-      : '0'
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.inputs.borderColor,
-    hexToRgb(inputs?.border?.color ?? '').join(', ')
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.inputs.borderOpacity,
-    isDefined(inputs?.border?.opacity)
-      ? inputs.border.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.inputs.opacity,
-    inputs?.backgroundColor === 'transparent'
-      ? '0'
-      : isDefined(inputs?.opacity)
-      ? inputs.opacity.toString()
-      : defaultOpacity.toString()
-  )
-
-  documentStyle.setProperty(
-    cssVariableNames.chat.inputs.blur,
-    isDefined(inputs?.blur) ? `${inputs.blur ?? 0}px` : 'none'
-  )
-
-  setShadow(
-    inputs?.shadow ?? defaultInputsShadow,
-    documentStyle,
-    cssVariableNames.chat.inputs.boxShadow
+    inputs.placeholderColor ?? defaultTheme.chat.inputs.placeholderColor
   )
 }
 
-const setCheckbox = (
-  container: ChatTheme['container'],
-  generalBackground: GeneralTheme['background'],
-  documentStyle: CSSStyleDeclaration
-) => {
-  const chatContainerBgColor =
-    container?.backgroundColor ?? defaultContainerBackgroundColor
-  const isChatBgTransparent =
-    chatContainerBgColor === 'transparent' ||
-    isEmpty(chatContainerBgColor) ||
-    (container?.opacity ?? defaultOpacity) <= 0.2
-
-  if (isChatBgTransparent) {
-    const bgType = generalBackground?.type ?? defaultBackgroundType
-    documentStyle.setProperty(
-      cssVariableNames.chat.checkbox.bgRgb,
-      bgType === BackgroundType.IMAGE
-        ? 'rgba(255, 255, 255, 0.75)'
-        : hexToRgb(
-            (bgType === BackgroundType.COLOR
-              ? generalBackground?.content
-              : '#ffffff') ?? '#ffffff'
-          ).join(', ')
-    )
-    if (bgType === BackgroundType.IMAGE) {
-      documentStyle.setProperty(cssVariableNames.chat.checkbox.alphaRatio, '3')
-    } else {
-      documentStyle.setProperty(
-        cssVariableNames.chat.checkbox.alphaRatio,
-        generalBackground?.content && isLight(generalBackground?.content)
-          ? '1'
-          : '2'
-      )
-    }
-  } else {
-    documentStyle.setProperty(
-      cssVariableNames.chat.checkbox.bgRgb,
-      hexToRgb(chatContainerBgColor)
-        .concat(container?.opacity ?? 1)
-        .join(', ')
-    )
-    documentStyle.setProperty(
-      cssVariableNames.chat.checkbox.alphaRatio,
-      isLight(chatContainerBgColor) ? '1' : '2'
-    )
-  }
-}
-
-const setGeneralBackground = (
-  background: Background | undefined,
+const setTypebotBackground = (
+  background: Background,
   documentStyle: CSSStyleDeclaration
 ) => {
   documentStyle.setProperty(cssVariableNames.general.bgImage, null)
   documentStyle.setProperty(cssVariableNames.general.bgColor, null)
   documentStyle.setProperty(
-    (background?.type ?? defaultBackgroundType) === BackgroundType.IMAGE
+    background?.type === BackgroundType.IMAGE
       ? cssVariableNames.general.bgImage
       : cssVariableNames.general.bgColor,
-    parseBackgroundValue({
-      type: background?.type ?? defaultBackgroundType,
-      content: background?.content ?? defaultBackgroundColor,
-    })
+    parseBackgroundValue(background)
   )
+  documentStyle.setProperty(
+    cssVariableNames.chat.checkbox.bgColor,
+    background?.type === BackgroundType.IMAGE
+      ? 'rgba(255, 255, 255, 0.75)'
+      : (background?.type === BackgroundType.COLOR
+          ? background.content
+          : '#ffffff') ?? '#ffffff'
+  )
+  const backgroundColor =
+    background.type === BackgroundType.IMAGE
+      ? '#000000'
+      : background?.type === BackgroundType.COLOR &&
+        isNotEmpty(background.content)
+      ? background.content
+      : '#ffffff'
+  documentStyle.setProperty(
+    cssVariableNames.general.color,
+    isLight(backgroundColor) ? '#303235' : '#ffffff'
+  )
+  if (background.type === BackgroundType.IMAGE) {
+    documentStyle.setProperty(cssVariableNames.chat.checkbox.baseAlpha, '0.40')
+  } else {
+    documentStyle.setProperty(cssVariableNames.chat.checkbox.baseAlpha, '0')
+  }
 }
 
 const parseBackgroundValue = ({ type, content }: Background = {}) => {
@@ -629,80 +261,25 @@ const parseBackgroundValue = ({ type, content }: Background = {}) => {
       return 'transparent'
     case undefined:
     case BackgroundType.COLOR:
-      return content ?? defaultBackgroundColor
+      return content ?? defaultTheme.general.background.content
     case BackgroundType.IMAGE:
       return `url(${content})`
   }
 }
 
-const setBorderRadius = (
-  border: ContainerBorderTheme,
-  documentStyle: CSSStyleDeclaration,
-  variableName: string
+const setRoundness = (
+  roundness: NonNullable<ChatTheme['roundness']>,
+  documentStyle: CSSStyleDeclaration
 ) => {
-  switch (border?.roundeness ?? defaultRoundness) {
-    case 'none': {
-      documentStyle.setProperty(variableName, '0')
-      break
-    }
-    case 'medium': {
-      documentStyle.setProperty(variableName, '6px')
-      break
-    }
-    case 'large': {
-      documentStyle.setProperty(variableName, '20px')
-      break
-    }
-    case 'custom': {
-      documentStyle.setProperty(
-        variableName,
-        `${border.customRoundeness ?? 6}px`
-      )
-      break
-    }
-  }
-}
-
-// Props taken from https://tailwindcss.com/docs/box-shadow
-const setShadow = (
-  shadow: ContainerTheme['shadow'],
-  documentStyle: CSSStyleDeclaration,
-  variableName: string
-) => {
-  if (shadow === undefined) {
-    documentStyle.setProperty(variableName, '0 0 #0000')
-    return
-  }
-  switch (shadow) {
+  switch (roundness) {
     case 'none':
-      documentStyle.setProperty(variableName, '0 0 #0000')
+      documentStyle.setProperty('--typebot-border-radius', '0')
       break
-    case 'sm':
-      documentStyle.setProperty(variableName, '0 1px 2px 0 rgb(0 0 0 / 0.05)')
+    case 'medium':
+      documentStyle.setProperty('--typebot-border-radius', '6px')
       break
-    case 'md':
-      documentStyle.setProperty(
-        variableName,
-        '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
-      )
-      break
-    case 'lg':
-      documentStyle.setProperty(
-        variableName,
-        '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
-      )
-      break
-    case 'xl':
-      documentStyle.setProperty(
-        variableName,
-        '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
-      )
-      break
-    case '2xl':
-      documentStyle.setProperty(
-        variableName,
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)'
-      )
+    case 'large':
+      documentStyle.setProperty('--typebot-border-radius', '20px')
       break
   }
 }

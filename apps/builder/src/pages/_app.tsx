@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { AppProps } from 'next/app'
-import { SessionProvider } from 'next-auth/react'
 import { ChakraProvider, createStandaloneToast } from '@chakra-ui/react'
 import { customTheme } from '@/lib/theme'
 import { useRouterProgressBar } from '@/lib/routerProgressBar'
@@ -62,19 +61,17 @@ const App = ({ Component, pageProps }: AppProps) => {
       <ToastContainer />
       <ChakraProvider theme={customTheme}>
         <Toaster />
-        <SessionProvider session={pageProps.session}>
-          <UserProvider>
-            <TypebotProvider typebotId={typebotId}>
-              <WorkspaceProvider typebotId={typebotId}>
-                <Component {...pageProps} />
-                {!router.pathname.endsWith('edit') && isCloudProdInstance() && (
-                  <SupportBubble />
-                )}
-                <NewVersionPopup />
-              </WorkspaceProvider>
-            </TypebotProvider>
-          </UserProvider>
-        </SessionProvider>
+        <UserProvider>
+          <TypebotProvider typebotId={typebotId}>
+            <WorkspaceProvider typebotId={typebotId}>
+              <Component {...pageProps} />
+              {!router.pathname.endsWith('edit') && isCloudProdInstance() && (
+                <SupportBubble />
+              )}
+              <NewVersionPopup />
+            </WorkspaceProvider>
+          </TypebotProvider>
+        </UserProvider>
       </ChakraProvider>
     </TolgeeProvider>
   )

@@ -11,10 +11,16 @@ import { SessionState } from '@typebot.io/schemas/features/chat/sessionState'
 import { ExecuteIntegrationResponse } from '../../../types'
 import { parseVariables } from '@typebot.io/variables/parseVariables'
 import { updateVariablesInSession } from '@typebot.io/variables/updateVariablesInSession'
+import { MilvusBlock } from '@typebot.io/schemas/features/blocks/milvus'
 
 type Props = {
   state: SessionState
-  block: HttpRequestBlock | ZapierBlock | MakeComBlock | PabblyConnectBlock
+  block:
+    | HttpRequestBlock
+    | ZapierBlock
+    | MakeComBlock
+    | PabblyConnectBlock
+    | MilvusBlock
   logs?: ChatLog[]
   response: {
     statusCode: number

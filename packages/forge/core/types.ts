@@ -1,6 +1,7 @@
 import { SVGProps } from 'react'
 import { z } from './zod'
 import { ZodRawShape } from 'zod'
+import { enabledBlocks } from '@typebot.io/forge-repository'
 
 export type VariableStore = {
   get: (variableId: string) => string | (string | null)[] | null | undefined
@@ -30,12 +31,14 @@ export type FunctionToExecute = {
   content: string
 }
 
+export type ReadOnlyVariableStore = Omit<VariableStore, 'set'>
+
 export type TurnableIntoParam<T = {}> = {
-  blockId: string
+  blockType: (typeof enabledBlocks)[number]
   /**
    * If defined will be used to convert the existing block options into the new block options.
    */
-  transform?: (options: T) => any
+  customMapping?: (options: T) => any
 }
 
 export type ActionDefinition<
@@ -63,17 +66,11 @@ export type ActionDefinition<
       run: (params: {
         credentials: CredentialsFromAuthDef<A>
         options: z.infer<BaseOptions> & z.infer<Options>
-        variables: VariableStore
+        variables: ReadOnlyVariableStore
       }) => Promise<ReadableStream<any> | undefined>
     }
     web?: {
       displayEmbedBubble?: {
-        /**
-         * Used to determine the URL to be displayed as a text bubble in runtimes where the code can't be executed. (i.e. WhatsApp)
-         */
-        parseUrl: (params: {
-          options: z.infer<BaseOptions> & z.infer<Options>
-        }) => string | undefined
         waitForEvent?: {
           getSaveVariableId?: (
             options: z.infer<BaseOptions> & z.infer<Options>
@@ -85,7 +82,6 @@ export type ActionDefinition<
         parseInitFunction: (params: {
           options: z.infer<BaseOptions> & z.infer<Options>
         }) => FunctionToExecute
-        maxBubbleWidth?: number
       }
       parseFunction?: (params: {
         options: z.infer<BaseOptions> & z.infer<Options>

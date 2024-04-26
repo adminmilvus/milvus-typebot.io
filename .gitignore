@@ -1,6 +1,5 @@
 node_modules
 .next
-.env.local
 workspace.code-workspace
 .DS_Store
 .turbo
@@ -18,10 +17,6 @@ test/report
 .cache-loader
 build
 firebaseServiceAccount.json
-
-.env.production
-.env.staging
-
 # Wordpress
 .svn
 tags
@@ -37,5 +32,4 @@ typebotsToFix.json
 
 snapshots
 
-.env
 .typebot-build

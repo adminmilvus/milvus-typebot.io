@@ -1,6 +1,6 @@
 import { createAction, option } from '@typebot.io/forge'
 import { isDefined, isEmpty } from '@typebot.io/lib'
-import ky, { HTTPError } from 'ky'
+import { HTTPError, got } from 'got'
 import { apiBaseUrl } from '../constants'
 import { auth } from '../auth'
 import { ChatNodeResponse } from '../types'
@@ -40,7 +40,7 @@ export const sendMessage = createAction({
       logs,
     }) => {
       try {
-        const res: ChatNodeResponse = await ky
+        const res: ChatNodeResponse = await got
           .post(apiBaseUrl + botId, {
             headers: {
               Authorization: `Bearer ${apiKey}`,
@@ -66,7 +66,7 @@ export const sendMessage = createAction({
           return logs.add({
             status: 'error',
             description: error.message,
-            details: await error.response.text(),
+            details: error.response.body,
           })
         console.error(error)
       }

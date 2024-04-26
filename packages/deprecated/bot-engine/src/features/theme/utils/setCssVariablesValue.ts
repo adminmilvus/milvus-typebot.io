@@ -1,9 +1,9 @@
 import {
   Background,
   ChatTheme,
-  ContainerTheme,
+  ContainerColors,
   GeneralTheme,
-  InputTheme,
+  InputColors,
   Theme,
 } from '@typebot.io/schemas'
 import { BackgroundType } from '@typebot.io/schemas/features/typebot/theme/constants'
@@ -66,7 +66,7 @@ const setChatTheme = (
 }
 
 const setHostBubbles = (
-  hostBubbles: ContainerTheme,
+  hostBubbles: ContainerColors,
   documentStyle: CSSStyleDeclaration
 ) => {
   if (hostBubbles.backgroundColor)
@@ -82,7 +82,7 @@ const setHostBubbles = (
 }
 
 const setGuestBubbles = (
-  guestBubbles: any,
+  guestBubbles: ContainerColors,
   documentStyle: CSSStyleDeclaration
 ) => {
   if (guestBubbles.backgroundColor)
@@ -98,7 +98,7 @@ const setGuestBubbles = (
 }
 
 const setButtons = (
-  buttons: ContainerTheme,
+  buttons: ContainerColors,
   documentStyle: CSSStyleDeclaration
 ) => {
   if (buttons.backgroundColor)
@@ -113,7 +113,7 @@ const setButtons = (
     )
 }
 
-const setInputs = (inputs: InputTheme, documentStyle: CSSStyleDeclaration) => {
+const setInputs = (inputs: InputColors, documentStyle: CSSStyleDeclaration) => {
   if (inputs.backgroundColor)
     documentStyle.setProperty(
       cssVariableNames.chat.inputs.bgColor,

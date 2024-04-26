@@ -1,7 +1,8 @@
 import { PrismaClient } from '@typebot.io/prisma'
 import { promptAndSetEnvironment } from './utils'
-import ky, { HTTPError } from 'ky'
+import got, { HTTPError } from 'got'
 import { confirm, text, isCancel } from '@clack/prompts'
+import { writeFileSync } from 'fs'
 
 const insertUsersInBrevoList = async () => {
   await promptAndSetEnvironment('production')
@@ -43,7 +44,7 @@ const insertUsersInBrevoList = async () => {
   }
 
   try {
-    await ky.post('https://api.brevo.com/v3/contacts/import', {
+    await got.post('https://api.brevo.com/v3/contacts/import', {
       headers: {
         'api-key': process.env.BREVO_API_KEY,
       },
@@ -57,7 +58,7 @@ const insertUsersInBrevoList = async () => {
     })
   } catch (err) {
     if (err instanceof HTTPError) {
-      console.log(await err.response.text())
+      console.log(err.response.body)
       return
     }
     console.log(err)

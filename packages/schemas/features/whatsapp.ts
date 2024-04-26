@@ -174,10 +174,6 @@ export const whatsAppWebhookRequestBodySchema = z.object({
   ),
 })
 
-export type WhatsAppWebhookRequestBody = z.infer<
-  typeof whatsAppWebhookRequestBodySchema
->
-
 export const whatsAppCredentialsSchema = z
   .object({
     type: z.literal('whatsApp'),

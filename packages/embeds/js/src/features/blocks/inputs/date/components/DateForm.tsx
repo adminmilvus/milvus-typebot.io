@@ -3,7 +3,6 @@ import { InputSubmitContent } from '@/types'
 import { DateInputBlock } from '@typebot.io/schemas'
 import { createSignal } from 'solid-js'
 import { defaultDateInputOptions } from '@typebot.io/schemas/features/blocks/inputs/date/constants'
-import clsx from 'clsx'
 
 type Props = {
   onSubmit: (inputValue: InputSubmitContent) => void
@@ -20,10 +19,7 @@ export const DateForm = (props: Props) => {
     <div class="flex flex-col">
       <div class="flex items-center">
         <form
-          class={clsx(
-            'flex justify-between typebot-input pr-2',
-            props.options?.isRange ? 'items-end' : 'items-center'
-          )}
+          class={'flex justify-between typebot-input pr-2 items-end'}
           onSubmit={(e) => {
             if (inputValues().from === '' && inputValues().to === '') return
             e.preventDefault()
@@ -99,7 +95,8 @@ export const DateForm = (props: Props) => {
           </div>
 
           <SendButton class="my-2 ml-2">
-            {props.options?.labels?.button}
+            {props.options?.labels?.button ??
+              defaultDateInputOptions.labels.button}
           </SendButton>
         </form>
       </div>

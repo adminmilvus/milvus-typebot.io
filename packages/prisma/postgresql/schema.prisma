@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["metrics"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -328,11 +327,10 @@ model ClaimableCustomPlan {
 }
 
 model ChatSession {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
-  state      Json
-  isReplying Boolean?
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  state     Json
 }
 
 model ThemeTemplate {

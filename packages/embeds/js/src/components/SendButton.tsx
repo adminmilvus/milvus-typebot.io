@@ -16,7 +16,6 @@ export const SendButton = (props: SendButtonProps) => {
   return (
     <Button type="submit" {...others}>
       {(isMobile() && !local.disableIcon) ||
-      !props.children ||
       (typeof props.children === 'string' && isEmpty(props.children)) ? (
         <SendIcon
           class={'send-icon flex ' + (local.disableIcon ? 'hidden' : '')}

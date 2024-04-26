@@ -1,6 +1,5 @@
 import prisma from '@typebot.io/lib/prisma'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAuthenticatedUser } from '@/features/auth/helpers/getAuthenticatedUser'
 import {
   methodNotAllowed,
   notAuthenticated,
@@ -10,10 +9,11 @@ import { isReadWorkspaceFobidden } from '@/features/workspace/helpers/isReadWork
 import { WhatsAppCredentials } from '@typebot.io/schemas/features/whatsapp'
 import { decrypt } from '@typebot.io/lib/api/encryption/decrypt'
 import { downloadMedia } from '@typebot.io/bot-engine/whatsapp/downloadMedia'
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'GET') {
-    const user = await getAuthenticatedUser(req, res)
+    const user = getAuthenticatedUser()
     if (!user) return notAuthenticated(res)
 
     const typebotId = req.query.typebotId as string

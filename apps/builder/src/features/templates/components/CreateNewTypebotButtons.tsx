@@ -11,7 +11,6 @@ import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { ImportTypebotFromFileButton } from './ImportTypebotFromFileButton'
 import { useWorkspace } from '@/features/workspace/WorkspaceProvider'
-import { useUser } from '@/features/account/hooks/useUser'
 import { useToast } from '@/hooks/useToast'
 import { trpc } from '@/lib/trpc'
 import { useTranslate } from '@tolgee/react'
@@ -21,10 +20,8 @@ import { TemplatesModal } from './TemplatesModal'
 export const CreateNewTypebotButtons = () => {
   const { t } = useTranslate()
   const { workspace } = useWorkspace()
-  const { user } = useUser()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
-
   const [isLoading, setIsLoading] = useState(false)
 
   const { showToast } = useToast()
@@ -82,7 +79,7 @@ export const CreateNewTypebotButtons = () => {
   })
 
   const handleCreateSubmit = async (typebot?: Typebot) => {
-    if (!user || !workspace) return
+    if (!workspace) return
     const folderId = router.query.folderId?.toString() ?? null
     if (typebot)
       importTypebot({

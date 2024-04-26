@@ -1,7 +1,6 @@
 import { PictureChoiceBlock, SessionState } from '@typebot.io/schemas'
 import { ParsedReply } from '../../../types'
 import { injectVariableValuesInPictureChoiceBlock } from './injectVariableValuesInPictureChoiceBlock'
-import { isNotEmpty } from '@typebot.io/lib/utils'
 
 export const parsePictureChoicesReply =
   (state: SessionState) =>
@@ -65,9 +64,7 @@ export const parsePictureChoicesReply =
       return {
         status: 'success',
         reply: matchedItems
-          .map((item) =>
-            isNotEmpty(item.title) ? item.title : item.pictureSrc ?? ''
-          )
+          .map((item) => item.title ?? item.pictureSrc ?? '')
           .join(', '),
       }
     }
@@ -84,8 +81,6 @@ export const parsePictureChoicesReply =
     if (!matchedItem) return { status: 'fail' }
     return {
       status: 'success',
-      reply: isNotEmpty(matchedItem.title)
-        ? matchedItem.title
-        : matchedItem.pictureSrc ?? '',
+      reply: matchedItem.title ?? matchedItem.pictureSrc ?? '',
     }
   }

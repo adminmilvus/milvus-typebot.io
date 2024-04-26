@@ -13,7 +13,6 @@ import { saveStateToDatabase } from '../saveStateToDatabase'
 import prisma from '@typebot.io/lib/prisma'
 import { isDefined } from '@typebot.io/lib/utils'
 import { Reply } from '../types'
-import { setChatSessionHasReplying } from '../queries/setChatSessionHasReplying'
 
 type Props = {
   receivedMessage: WhatsAppIncomingMessage
@@ -42,7 +41,11 @@ export const resumeWhatsAppFlow = async ({
     }
   }
 
+  const session = await getSession(sessionId)
+
   const isPreview = workspaceId === undefined || credentialsId === undefined
+
+  const { typebot } = session?.state.typebotsQueue[0] ?? {}
 
   const credentials = await getCredentials({ credentialsId, isPreview })
 
@@ -62,22 +65,9 @@ export const resumeWhatsAppFlow = async ({
 
   const reply = await getIncomingMessageContent({
     message: receivedMessage,
+    typebotId: typebot?.id,
     workspaceId,
     accessToken: credentials?.systemUserAccessToken,
-  })
-
-  const session = await getSession(sessionId)
-
-  if (session?.isReplying) {
-    console.log('Is currently replying, skipping...')
-    return {
-      message: 'Message received',
-    }
-  }
-
-  await setChatSessionHasReplying({
-    existingSessionId: session?.id,
-    newSessionId: sessionId,
   })
 
   const isSessionExpired =
@@ -129,6 +119,7 @@ export const resumeWhatsAppFlow = async ({
   })
 
   await saveStateToDatabase({
+    forceCreateSession: !session && isDefined(input),
     clientSideActions: [],
     input,
     logs,
@@ -149,10 +140,12 @@ export const resumeWhatsAppFlow = async ({
 
 const getIncomingMessageContent = async ({
   message,
+  typebotId,
   workspaceId,
   accessToken,
 }: {
   message: WhatsAppIncomingMessage
+  typebotId?: string
   workspaceId?: string
   accessToken: string
 }): Promise<Reply> => {
@@ -168,6 +161,7 @@ const getIncomingMessageContent = async ({
     case 'audio':
     case 'video':
     case 'image':
+      if (!typebotId) return
       let mediaId: string | undefined
       if (message.type === 'video') mediaId = message.video.id
       if (message.type === 'image') mediaId = message.image.id

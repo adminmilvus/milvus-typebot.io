@@ -11,7 +11,6 @@ export const auth = {
         'You can generate an API key [here](https://go.chatnode.ai/typebot).',
       inputType: 'password',
       withVariableButton: false,
-      isDebounceDisabled: true,
     }),
   }),
 } satisfies AuthDefinition

@@ -124,9 +124,7 @@
                 "editor/blocks/integrations/openai",
                 "editor/blocks/integrations/zemantic-ai",
                 "editor/blocks/integrations/mistral",
-                "editor/blocks/integrations/elevenlabs",
-                "editor/blocks/integrations/anthropic",
-                "editor/blocks/integrations/dify-ai"
+                "editor/blocks/integrations/elevenlabs"
               ]
             }
           ]
@@ -144,7 +142,7 @@
     },
     {
       "group": "Settings",
-      "pages": ["settings/overview", "settings/remember-user"]
+      "pages": ["settings/overview"]
     },
     {
       "group": "Deploy",
@@ -240,7 +238,6 @@
         "contribute/guides/local-installation",
         "contribute/guides/create-block",
         "contribute/guides/documentation",
-        "contribute/guides/blog",
         "contribute/guides/translation"
       ]
     },

@@ -2,7 +2,6 @@ import { DashboardFolder, WorkspaceRole } from '@typebot.io/prisma'
 import {
   Flex,
   Heading,
-  HStack,
   Portal,
   Skeleton,
   Stack,
@@ -10,36 +9,37 @@ import {
   Wrap,
 } from '@chakra-ui/react'
 import { useTypebotDnd } from '../TypebotDndProvider'
-import React, { useEffect, useState } from 'react'
-import { BackButton } from './BackButton'
+import React, { useState } from 'react'
 import { useWorkspace } from '@/features/workspace/WorkspaceProvider'
 import { useToast } from '@/hooks/useToast'
 import { CreateBotButton } from './CreateBotButton'
-import { CreateFolderButton } from './CreateFolderButton'
-import FolderButton, { ButtonSkeleton } from './FolderButton'
-import TypebotButton from './TypebotButton'
+import { ButtonSkeleton, FolderButton } from './FolderButton'
+import { TypebotButton } from './TypebotButton'
 import { TypebotCardOverlay } from './TypebotButtonOverlay'
 import { useTypebots } from '@/features/dashboard/hooks/useTypebots'
 import { TypebotInDashboard } from '@/features/dashboard/types'
 import { trpc } from '@/lib/trpc'
-import { NodePosition } from '@/features/graph/providers/GraphDndProvider'
 
 type Props = { folder: DashboardFolder | null }
 
+const dragDistanceTolerance = 20
+
 export const FolderContent = ({ folder }: Props) => {
   const { workspace, currentRole } = useWorkspace()
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false)
   const {
     setDraggedTypebot,
     draggedTypebot,
     mouseOverFolderId,
     setMouseOverFolderId,
   } = useTypebotDnd()
+  const [mouseDownPosition, setMouseDownPosition] = useState({ x: 0, y: 0 })
   const [draggablePosition, setDraggablePosition] = useState({ x: 0, y: 0 })
-  const [mousePositionInElement, setMousePositionInElement] = useState({
+  const [relativeDraggablePosition, setRelativeDraggablePosition] = useState({
     x: 0,
     y: 0,
   })
+  const [typebotDragCandidate, setTypebotDragCandidate] =
+    useState<TypebotInDashboard>()
 
   const { showToast } = useToast()
 
@@ -62,14 +62,14 @@ export const FolderContent = ({ folder }: Props) => {
     }
   )
 
-  const { mutate: createFolder } = trpc.folders.createFolder.useMutation({
-    onError: (error) => {
-      showToast({ description: error.message })
-    },
-    onSuccess: () => {
-      refetchFolders()
-    },
-  })
+  // const { mutate: createFolder } = trpc.folders.createFolder.useMutation({
+  //   onError: (error) => {
+  //     showToast({ description: error.message })
+  //   },
+  //   onSuccess: () => {
+  //     refetchFolders()
+  //   },
+  // })
 
   const { mutate: updateTypebot } = trpc.typebot.updateTypebot.useMutation({
     onError: (error) => {
@@ -104,67 +104,52 @@ export const FolderContent = ({ folder }: Props) => {
     })
   }
 
-  const handleCreateFolder = () => {
-    if (!folders || !workspace) return
-    setIsCreatingFolder(true)
-    createFolder({
-      workspaceId: workspace.id,
-      parentFolderId: folder?.id,
-    })
-    setIsCreatingFolder(false)
-  }
+  // const handleCreateFolder = () => {
+  //   if (!folders || !workspace) return
+  //   setIsCreatingFolder(true)
+  //   createFolder({
+  //     workspaceId: workspace.id,
+  //     parentFolderId: folder?.id,
+  //   })
+  //   setIsCreatingFolder(false)
+  // }
 
   const handleMouseUp = async () => {
     if (mouseOverFolderId !== undefined && draggedTypebot)
       await moveTypebotToFolder(draggedTypebot.id, mouseOverFolderId ?? 'root')
+    setTypebotDragCandidate(undefined)
     setMouseOverFolderId(undefined)
     setDraggedTypebot(undefined)
   }
   useEventListener('mouseup', handleMouseUp)
 
-  const handleTypebotDrag =
-    (typebot: TypebotInDashboard) =>
-    ({ absolute, relative }: NodePosition) => {
-      if (draggedTypebot) return
-      setMousePositionInElement(relative)
-      setDraggablePosition({
-        x: absolute.x - relative.x,
-        y: absolute.y - relative.y,
-      })
-      setDraggedTypebot(typebot)
+  const handleMouseDown =
+    (typebot: TypebotInDashboard) => (e: React.MouseEvent) => {
+      const element = e.currentTarget as HTMLDivElement
+      const rect = element.getBoundingClientRect()
+      setDraggablePosition({ x: rect.left, y: rect.top })
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      setRelativeDraggablePosition({ x, y })
+      setMouseDownPosition({ x: e.screenX, y: e.screenY })
+      setTypebotDragCandidate(typebot)
     }
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!draggedTypebot) return
-    const { clientX, clientY } = e
+    if (!typebotDragCandidate) return
+    const { clientX, clientY, screenX, screenY } = e
+    if (
+      Math.abs(mouseDownPosition.x - screenX) > dragDistanceTolerance ||
+      Math.abs(mouseDownPosition.y - screenY) > dragDistanceTolerance
+    )
+      setDraggedTypebot(typebotDragCandidate)
     setDraggablePosition({
-      x: clientX - mousePositionInElement.x,
-      y: clientY - mousePositionInElement.y,
+      ...draggablePosition,
+      x: clientX - relativeDraggablePosition.x,
+      y: clientY - relativeDraggablePosition.y,
     })
   }
   useEventListener('mousemove', handleMouseMove)
-
-  useEffect(() => {
-    if (!draggablePosition || !draggedTypebot) return
-    const { innerHeight } = window
-    const scrollSpeed = 10
-    const scrollMargin = 50
-    const clientY = draggablePosition.y + mousePositionInElement.y
-    const scrollY =
-      clientY < scrollMargin
-        ? -scrollSpeed
-        : clientY > innerHeight - scrollMargin
-        ? scrollSpeed
-        : 0
-    window.scrollBy(0, scrollY)
-    const interval = setInterval(() => {
-      window.scrollBy(0, scrollY)
-    }, 5)
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [draggablePosition, draggedTypebot, mousePositionInElement])
 
   return (
     <Flex w="full" flex="1" justify="center">
@@ -173,7 +158,7 @@ export const FolderContent = ({ folder }: Props) => {
           <Heading as="h1">{folder?.name}</Heading>
         </Skeleton>
         <Stack>
-          <HStack>
+          {/* <HStack>
             {folder && <BackButton id={folder.parentFolderId} />}
             {currentRole !== WorkspaceRole.GUEST && (
               <CreateFolderButton
@@ -181,7 +166,7 @@ export const FolderContent = ({ folder }: Props) => {
                 isLoading={isCreatingFolder || isFolderLoading}
               />
             )}
-          </HStack>
+          </HStack> */}
           <Wrap spacing={4}>
             {currentRole !== WorkspaceRole.GUEST && (
               <CreateBotButton
@@ -192,10 +177,9 @@ export const FolderContent = ({ folder }: Props) => {
             )}
             {isFolderLoading && <ButtonSkeleton />}
             {folders &&
-              folders.map((folder, index) => (
+              folders.map((folder) => (
                 <FolderButton
-                  key={folder.id}
-                  index={index}
+                  key={folder.id.toString()}
                   folder={folder}
                   onFolderDeleted={refetchFolders}
                   onFolderRenamed={() => refetchFolders()}
@@ -205,11 +189,10 @@ export const FolderContent = ({ folder }: Props) => {
             {typebots &&
               typebots.map((typebot) => (
                 <TypebotButton
-                  key={typebot.id}
+                  key={typebot.id.toString()}
                   typebot={typebot}
-                  draggedTypebot={draggedTypebot}
                   onTypebotUpdated={refetchTypebots}
-                  onDrag={handleTypebotDrag(typebot)}
+                  onMouseDown={handleMouseDown(typebot)}
                 />
               ))}
           </Wrap>
@@ -226,7 +209,6 @@ export const FolderContent = ({ folder }: Props) => {
             style={{
               transform: `translate(${draggablePosition.x}px, ${draggablePosition.y}px) rotate(-2deg)`,
             }}
-            transformOrigin="0 0 0"
           />
         </Portal>
       )}

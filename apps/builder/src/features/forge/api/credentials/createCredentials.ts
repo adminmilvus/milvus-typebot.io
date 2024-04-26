@@ -4,8 +4,7 @@ import { TRPCError } from '@trpc/server'
 import { encrypt } from '@typebot.io/lib/api/encryption/encrypt'
 import { z } from 'zod'
 import { isWriteWorkspaceForbidden } from '@/features/workspace/helpers/isWriteWorkspaceForbidden'
-import { forgedCredentialsSchemas } from '@typebot.io/forge-repository/credentials'
-import { isDefined } from '@typebot.io/lib'
+import { forgedCredentialsSchemas } from '@typebot.io/forge-schemas'
 
 const inputShape = {
   data: true,
@@ -21,9 +20,7 @@ export const createCredentials = authenticatedProcedure
         'type',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        Object.values(forgedCredentialsSchemas)
-          .filter(isDefined)
-          .map((i) => i.pick(inputShape))
+        forgedCredentialsSchemas.map((i) => i.pick(inputShape))
       ),
     })
   )

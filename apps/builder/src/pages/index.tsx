@@ -1,6 +1,5 @@
+import { getAuthenticatedUser } from '@/features/auth/helpers/utils'
 import { GetServerSidePropsContext } from 'next'
-import { getServerSession } from 'next-auth'
-import { getAuthOptions } from './api/auth/[...nextauth]'
 
 export default function Page() {
   return null
@@ -9,12 +8,9 @@ export default function Page() {
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const session = await getServerSession(
-    context.req,
-    context.res,
-    getAuthOptions({})
-  )
-  if (!session?.user) {
+  const user = getAuthenticatedUser()
+
+  if (!user) {
     return {
       redirect: {
         permanent: false,

@@ -23,8 +23,10 @@ import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/const
 import { IntegrationBlockType } from '@typebot.io/schemas/features/blocks/integrations/constants'
 import { LogicBlockType } from '@typebot.io/schemas/features/blocks/logic/constants'
 import { BlockV6 } from '@typebot.io/schemas'
+import { enabledBlocks } from '@typebot.io/forge-repository'
 import { useDebouncedCallback } from 'use-debounce'
-import { forgedBlockIds } from '@typebot.io/forge-repository/constants'
+import { BlockCardMilvus } from './BlockCardMilvus'
+import { MilvusBlockType } from '@typebot.io/schemas/features/blocks/milvus/constants'
 
 // Integration blocks migrated to forged blocks
 const legacyIntegrationBlocks = [
@@ -42,6 +44,9 @@ export const BlocksSideBar = () => {
   const [relativeCoordinates, setRelativeCoordinates] = useState({ x: 0, y: 0 })
   const [isLocked, setIsLocked] = useState(true)
   const [isExtended, setIsExtended] = useState(true)
+  const [logicBlocked] = useState<LogicBlockType[]>([
+    LogicBlockType.TYPEBOT_LINK,
+  ])
 
   const closeSideBar = useDebouncedCallback(() => setIsExtended(false), 200)
 
@@ -137,6 +142,21 @@ export const BlocksSideBar = () => {
 
         <Stack>
           <Text fontSize="sm" fontWeight="semibold">
+            {t('milvus.heading')}
+          </Text>
+          <SimpleGrid columns={2} spacing="3">
+            {Object.values(MilvusBlockType).map((type) => (
+              <BlockCardMilvus
+                key={type}
+                type={type}
+                onMouseDown={handleMouseDown}
+              />
+            ))}
+          </SimpleGrid>
+        </Stack>
+
+        <Stack>
+          <Text fontSize="sm" fontWeight="semibold">
             {t('editor.sidebarBlocks.blockType.bubbles.heading')}
           </Text>
           <SimpleGrid columns={2} spacing="3">
@@ -162,9 +182,16 @@ export const BlocksSideBar = () => {
             {t('editor.sidebarBlocks.blockType.logic.heading')}
           </Text>
           <SimpleGrid columns={2} spacing="3">
-            {Object.values(LogicBlockType).map((type) => (
-              <BlockCard key={type} type={type} onMouseDown={handleMouseDown} />
-            ))}
+            {Object.values(LogicBlockType).map(
+              (type) =>
+                !logicBlocked.includes(type) && (
+                  <BlockCard
+                    key={type}
+                    type={type}
+                    onMouseDown={handleMouseDown}
+                  />
+                )
+            )}
           </SimpleGrid>
         </Stack>
 
@@ -174,7 +201,7 @@ export const BlocksSideBar = () => {
           </Text>
           <SimpleGrid columns={2} spacing="3">
             {Object.values(IntegrationBlockType)
-              .concat(forgedBlockIds as any)
+              .concat(enabledBlocks as any)
               .filter((type) => !legacyIntegrationBlocks.includes(type))
               .map((type) => (
                 <BlockCard

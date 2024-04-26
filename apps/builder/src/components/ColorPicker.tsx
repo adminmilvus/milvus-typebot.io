@@ -35,16 +35,10 @@ const colorsSelection: `#${string}`[] = [
 type Props = {
   value?: string
   defaultValue?: string
-  isDisabled?: boolean
   onColorChange: (color: string) => void
 }
 
-export const ColorPicker = ({
-  value,
-  defaultValue,
-  isDisabled,
-  onColorChange,
-}: Props) => {
+export const ColorPicker = ({ value, defaultValue, onColorChange }: Props) => {
   const { t } = useTranslate()
   const [color, setColor] = useState(defaultValue ?? '')
   const displayedValue = value ?? color
@@ -69,7 +63,6 @@ export const ColorPicker = ({
           padding={0}
           borderRadius={3}
           borderWidth={1}
-          isDisabled={isDisabled}
         >
           <Box rounded="full" boxSize="14px" bgColor={displayedValue} />
         </Button>

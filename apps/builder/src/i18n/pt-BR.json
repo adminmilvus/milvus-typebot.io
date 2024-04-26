@@ -312,6 +312,25 @@
   "editor.sidebarBlocks.blockType.inputs.heading": "Inputs",
   "editor.sidebarBlocks.blockType.integrations.heading": "Integrações",
   "editor.sidebarBlocks.blockType.logic.heading": "Condicionais",
+
+  "milvus.heading": "Milvus",
+  "milvus.label.createTicket": "Criar Ticket",
+  "milvus.label.baseByTag": "Base por Tag",
+  "milvus.label.articleById": "Artigo por Id",
+  "milvus.label.clientByDocumento": "Cliente pelo Documento",
+  "milvus.label.clientByEmail": "Cliente pelo Email",
+  "milvus.label.speakWithAttendant": "Falar com Atendente",
+  "milvus.label.closeChat": "Fechar chat",
+  "milvus.label.menu.SaveAndPublic": "Salvar e Publicar",
+  "milvus.label.menu.Dashboard": "Dashboard",
+  "milvus.label.menu.Integration": "Integrações",
+  "milvus.label.menu.Chat": "Chat",
+
+  "milvus.config.testRequest": "Testar a request",
+  "milvus.config.saveVariable": "Salvar variável",
+  "milvus.config.variableValuesToTest": "Variáveis ​​para teste",
+  "milvus.route.401": "Rota não autorizada",
+
   "editor.sidebarBlocks.sidebar.icon.lock.label": "Bloquear",
   "editor.sidebarBlocks.sidebar.icon.unlock.label": "Desbloquear",
   "editor.sidebarBlocks.sidebar.lock.label": "Bloquear barra lateral",
@@ -340,6 +359,7 @@
   "help": "Ajuda",
   "pending": "Pendente",
   "preview.restartButton.label": "Reiniciar",
+
   "publish.error.label": "Erro durante a publicação do typebot",
   "publish.versionWarning.checkBreakingChanges": "Certifique-se de verificar todas as <link>alterações significativas associadas</link>",
   "publish.versionWarning.message.aboutToDeploy.label": "Você está prestes a fazer o deploy de uma versão do seu bot com uma engine atualizada. (Typebot V6).",

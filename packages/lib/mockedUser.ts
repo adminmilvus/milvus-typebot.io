@@ -1,4 +1,5 @@
 import { User } from '@typebot.io/prisma'
+import { graphGestureNotficationKey } from '@typebot.io/schemas/features/user/constants'
 
 export const mockedUser: User = {
   id: 'userId',
@@ -14,7 +15,7 @@ export const mockedUser: User = {
   onboardingCategories: [],
   updatedAt: new Date('2022-01-01'),
   displayedInAppNotifications: {
-    ['graphGestureNotification']: true,
+    [graphGestureNotficationKey]: true,
   },
   referral: null,
 }

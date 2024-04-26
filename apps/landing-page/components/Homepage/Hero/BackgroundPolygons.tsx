@@ -1,10 +1,7 @@
 import { chakra } from '@chakra-ui/react'
 import React from 'react'
 
-type Props = {
-  baseTop?: string
-}
-export const BackgroundPolygons = ({ baseTop = '100px' }: Props) => {
+export const BackgroundPolygons = () => {
   return (
     <>
       <chakra.div
@@ -12,7 +9,7 @@ export const BackgroundPolygons = ({ baseTop = '100px' }: Props) => {
         className="floating animation-delay-3000"
         pos="absolute"
         left="0px"
-        top={baseTop}
+        top="100px"
         data-aos="fade"
         data-aos-delay="200"
       >
@@ -23,7 +20,7 @@ export const BackgroundPolygons = ({ baseTop = '100px' }: Props) => {
         className="floating animation-delay-4000"
         pos="absolute"
         right="-10px"
-        top={`calc(${baseTop} - '70px')`}
+        top="30px"
         data-aos="fade"
         data-aos-delay="200"
       >

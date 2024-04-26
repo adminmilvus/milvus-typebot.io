@@ -1,3 +1,4 @@
+/* eslint-disable solid/reactivity */
 import { initGoogleAnalytics } from '@/lib/gtag'
 import { gtmBodyElement } from '@/lib/gtm'
 import { initPixel } from '@/lib/pixel'

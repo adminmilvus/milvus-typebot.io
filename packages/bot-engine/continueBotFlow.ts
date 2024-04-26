@@ -6,8 +6,7 @@ import {
   InputBlock,
   SessionState,
 } from '@typebot.io/schemas'
-import { byId } from '@typebot.io/lib'
-import { isInputBlock } from '@typebot.io/schemas/helpers'
+import { isInputBlock, byId } from '@typebot.io/lib'
 import { executeGroup, parseInput } from './executeGroup'
 import { getNextGroup } from './getNextGroup'
 import { validateEmail } from './blocks/inputs/email/validateEmail'
@@ -35,24 +34,24 @@ import { defaultChoiceInputOptions } from '@typebot.io/schemas/features/blocks/i
 import { defaultPictureChoiceOptions } from '@typebot.io/schemas/features/blocks/inputs/pictureChoice/constants'
 import { defaultFileInputOptions } from '@typebot.io/schemas/features/blocks/inputs/file/constants'
 import { VisitedEdge } from '@typebot.io/prisma'
-import { getBlockById } from '@typebot.io/schemas/helpers'
-import { ForgedBlock } from '@typebot.io/forge-repository/types'
-import { forgedBlocks } from '@typebot.io/forge-repository/definitions'
+import { getBlockById } from '@typebot.io/lib/getBlockById'
+import { ForgedBlock, forgedBlocks } from '@typebot.io/forge-schemas'
+import { enabledBlocks } from '@typebot.io/forge-repository'
 import { resumeChatCompletion } from './blocks/integrations/legacy/openai/resumeChatCompletion'
 import { env } from '@typebot.io/env'
 import { downloadMedia } from './whatsapp/downloadMedia'
 import { uploadFileToBucket } from '@typebot.io/lib/s3/uploadFileToBucket'
 import { isURL } from '@typebot.io/lib/validators/isURL'
-import { isForgedBlockType } from '@typebot.io/schemas/features/blocks/forged/helpers'
 
 type Params = {
   version: 1 | 2
   state: SessionState
   startTime?: number
+  chat_id?: string
 }
 export const continueBotFlow = async (
   reply: Reply,
-  { state, version, startTime }: Params
+  { state, version, startTime, chat_id }: Params
 ): Promise<
   ContinueChatResponse & {
     newSessionState: SessionState
@@ -112,12 +111,14 @@ export const continueBotFlow = async (
       response: JSON.parse(reply),
     })
     if (result.newSessionState) newSessionState = result.newSessionState
-  } else if (isForgedBlockType(block.type)) {
+  } else if (
+    enabledBlocks.includes(block.type as (typeof enabledBlocks)[number])
+  ) {
     if (reply) {
       const options = (block as ForgedBlock).options
-      const action = forgedBlocks[block.type].actions.find(
-        (a) => a.name === options?.action
-      )
+      const action = forgedBlocks
+        .find((b) => b.id === block.type)
+        ?.actions.find((a) => a.name === options?.action)
       if (action) {
         if (action.run?.stream?.getStreamVariableId) {
           firstBubbleWasStreamed = true
@@ -190,6 +191,7 @@ export const continueBotFlow = async (
         visitedEdges,
         firstBubbleWasStreamed,
         startTime,
+        chat_id,
       }
     )
     return {
@@ -229,6 +231,7 @@ export const continueBotFlow = async (
     firstBubbleWasStreamed,
     visitedEdges,
     startTime,
+    chat_id,
   })
 
   return {
@@ -276,9 +279,7 @@ const parseRetryMessage =
       block.options &&
       'retryMessageContent' in block.options &&
       block.options.retryMessageContent
-        ? parseVariables(state.typebotsQueue[0].typebot.variables)(
-            block.options.retryMessageContent
-          )
+        ? block.options.retryMessageContent
         : parseDefaultRetryMessage(block)
     return {
       messages: [

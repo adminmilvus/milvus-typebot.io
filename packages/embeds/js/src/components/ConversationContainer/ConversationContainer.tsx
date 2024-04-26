@@ -32,10 +32,6 @@ import {
 import { InputBlockType } from '@typebot.io/schemas/features/blocks/inputs/constants'
 import { saveClientLogsQuery } from '@/queries/saveClientLogsQuery'
 import { HTTPError } from 'ky'
-import { persist } from '@/utils/persist'
-
-const autoScrollBottomToleranceScreenPercent = 0.6
-const bottomSpacerHeight = 128
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -73,24 +69,13 @@ type Props = {
 
 export const ConversationContainer = (props: Props) => {
   let chatContainer: HTMLDivElement | undefined
-  const [chatChunks, setChatChunks, isRecovered] = persist(
-    createSignal<ChatChunkType[]>([
-      {
-        input: props.initialChatReply.input,
-        messages: props.initialChatReply.messages,
-        clientSideActions: props.initialChatReply.clientSideActions,
-      },
-    ]),
+  const [chatChunks, setChatChunks] = createSignal<ChatChunkType[]>([
     {
-      key: `typebot-${props.context.typebot.id}-chatChunks`,
-      storage: props.context.storage,
-      onRecovered: () => {
-        setTimeout(() => {
-          chatContainer?.scrollTo(0, chatContainer.scrollHeight)
-        }, 200)
-      },
-    }
-  )
+      input: props.initialChatReply.input,
+      messages: props.initialChatReply.messages,
+      clientSideActions: props.initialChatReply.clientSideActions,
+    },
+  ])
   const [dynamicTheme, setDynamicTheme] = createSignal<
     ContinueChatResponse['dynamicTheme']
   >(props.initialChatReply.dynamicTheme)
@@ -106,7 +91,7 @@ export const ConversationContainer = (props: Props) => {
       const actionsBeforeFirstBubble = initialChunk.clientSideActions.filter(
         (action) => isNotDefined(action.lastBubbleBlockId)
       )
-      await processClientSideActions(actionsBeforeFirstBubble)
+      processClientSideActions(actionsBeforeFirstBubble)
     })()
   })
 
@@ -157,7 +142,6 @@ export const ConversationContainer = (props: Props) => {
     const longRequest = setTimeout(() => {
       setIsSending(true)
     }, 1000)
-    autoScrollToBottom()
     const { data, error } = await continueChatQuery({
       apiHost: props.context.apiHost,
       sessionId: props.initialChatReply.sessionId,
@@ -208,14 +192,7 @@ export const ConversationContainer = (props: Props) => {
       const actionsBeforeFirstBubble = data.clientSideActions.filter((action) =>
         isNotDefined(action.lastBubbleBlockId)
       )
-      await processClientSideActions(actionsBeforeFirstBubble)
-      if (
-        data.clientSideActions.length === 1 &&
-        data.clientSideActions[0].type === 'stream' &&
-        data.messages.length === 0 &&
-        data.input === undefined
-      )
-        return
+      processClientSideActions(actionsBeforeFirstBubble)
     }
     setChatChunks((displayedChunks) => [
       ...displayedChunks,
@@ -227,27 +204,14 @@ export const ConversationContainer = (props: Props) => {
     ])
   }
 
-  const autoScrollToBottom = (lastElement?: HTMLDivElement, offset = 0) => {
-    if (!chatContainer) return
-
-    const bottomTolerance =
-      chatContainer.clientHeight * autoScrollBottomToleranceScreenPercent -
-      bottomSpacerHeight
-
-    const isBottomOfLastElementInView =
-      chatContainer.scrollTop + chatContainer.clientHeight >=
-      chatContainer.scrollHeight - bottomTolerance
-
-    if (isBottomOfLastElementInView) {
-      setTimeout(() => {
-        chatContainer?.scrollTo(
-          0,
-          lastElement
-            ? lastElement.offsetTop - offset
-            : chatContainer.scrollHeight
-        )
-      }, 50)
-    }
+  const autoScrollToBottom = (offsetTop?: number) => {
+    const chunks = chatChunks()
+    const lastChunkWasStreaming =
+      chunks.length >= 2 && chunks[chunks.length - 2].streamingMessageId
+    if (lastChunkWasStreaming) return
+    setTimeout(() => {
+      chatContainer?.scrollTo(0, offsetTop ?? chatContainer.scrollHeight)
+    }, 50)
   }
 
   const handleAllBubblesDisplayed = async () => {
@@ -272,7 +236,6 @@ export const ConversationContainer = (props: Props) => {
   const processClientSideActions = async (
     actions: NonNullable<ContinueChatResponse['clientSideActions']>
   ) => {
-    if (isRecovered()) return
     for (const action of actions) {
       if (
         'streamOpenAiChatCompletion' in action ||
@@ -308,12 +271,12 @@ export const ConversationContainer = (props: Props) => {
   return (
     <div
       ref={chatContainer}
-      class="flex flex-col overflow-y-auto w-full px-3 pt-10 relative scrollable-container typebot-chat-view scroll-smooth gap-2"
+      class="flex flex-col overflow-y-auto w-full min-h-full px-3 pt-10 relative scrollable-container typebot-chat-view scroll-smooth gap-2"
     >
       <For each={chatChunks()}>
         {(chatChunk, index) => (
           <ChatChunk
-            index={index()}
+            inputIndex={index()}
             messages={chatChunk.messages}
             input={chatChunk.input}
             theme={theme()}
@@ -327,7 +290,6 @@ export const ConversationContainer = (props: Props) => {
                 (chatChunk.messages.length > 0 && isSending()))
             }
             hasError={hasError() && index() === chatChunks().length - 1}
-            isTransitionDisabled={index() !== chatChunks().length - 1}
             onNewBubbleDisplayed={handleNewBubbleDisplayed}
             onAllBubblesDisplayed={handleAllBubblesDisplayed}
             onSubmit={sendMessage}
@@ -355,10 +317,5 @@ export const ConversationContainer = (props: Props) => {
 }
 
 const BottomSpacer = () => {
-  return (
-    <div
-      class="w-full flex-shrink-0"
-      style={{ height: bottomSpacerHeight + 'px' }}
-    />
-  )
+  return <div class="w-full h-32 flex-shrink-0" />
 }

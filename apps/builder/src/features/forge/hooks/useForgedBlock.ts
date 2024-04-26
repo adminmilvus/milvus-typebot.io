@@ -1,16 +1,22 @@
 import { useMemo } from 'react'
-import { forgedBlocks } from '@typebot.io/forge-repository/definitions'
-import { forgedBlockSchemas } from '@typebot.io/forge-repository/schemas'
+import { forgedBlockSchemas, forgedBlocks } from '@typebot.io/forge-schemas'
+import { enabledBlocks } from '@typebot.io/forge-repository'
 import { BlockV6 } from '@typebot.io/schemas'
-import { isForgedBlockType } from '@typebot.io/schemas/features/blocks/forged/helpers'
 
 export const useForgedBlock = (blockType: BlockV6['type'], action?: string) =>
   useMemo(() => {
-    if (!isForgedBlockType(blockType)) return {}
-    const blockDef = forgedBlocks[blockType]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((enabledBlocks as any).includes(blockType) === false) return {}
+    const blockDef = forgedBlocks.find(
+      (b) => enabledBlocks.includes(b.id) && b.id === blockType
+    )
     return {
       blockDef,
-      blockSchema: forgedBlockSchemas[blockType],
+      blockSchema: forgedBlockSchemas.find(
+        (b) =>
+          enabledBlocks.includes(b.shape.type.value) &&
+          b.shape.type.value === blockType
+      ),
       actionDef: action
         ? blockDef?.actions.find((a) => a.name === action)
         : undefined,

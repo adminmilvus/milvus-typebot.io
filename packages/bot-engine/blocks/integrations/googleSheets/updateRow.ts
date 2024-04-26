@@ -17,9 +17,8 @@ export const updateRow = async (
   }: { outgoingEdgeId?: string; options: GoogleSheetsUpdateRowOptions }
 ): Promise<ExecuteIntegrationResponse> => {
   const { variables } = state.typebotsQueue[0].typebot
-  const { sheetId, filter, ...parsedOptions } = deepParseVariables(variables, {
-    removeEmptyStrings: true,
-  })(options)
+  const { sheetId, filter, ...parsedOptions } =
+    deepParseVariables(variables)(options)
 
   const referenceCell =
     'referenceCell' in parsedOptions && parsedOptions.referenceCell
